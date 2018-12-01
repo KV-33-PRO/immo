@@ -7,13 +7,11 @@
 #define MOTOR_PIN_1      9
 #define MOTOR_PIN_2      10
 #define RUDDER_PIN       8
-#define ENCODER_RIGHT_A  2
-#define ENCODER_RIGHT_B  4
-#define ENCODER_LEFT_A   3
-#define ENCODER_LEFT_B   5
+#define ENCODER_LEFT     2
+#define ENCODER_RIGHT    3
 #define NUM_JOINTS       3
 
-bool encodersALast[2] = {LOW, LOW}; //0-LEFT, 1-RIGHT
+bool encodersFlag[2] = {LOW, LOW}; //0-LEFT, 1-RIGHT
 char *state_names[NUM_JOINTS] = {"left_wheel", "right_wheel", "rudder"};
 float state_pos[NUM_JOINTS] = {0, 0, 0};
 float state_vel[NUM_JOINTS] = {0, 0, 0};
@@ -33,10 +31,14 @@ void drive_cb(const geometry_msgs::Twist& cmd_vel){
   if (linear > 1){
     analogWrite(MOTOR_PIN_1, linear);
     analogWrite(MOTOR_PIN_2, 0);
+    state_pos[0] = state_pos[0]+getEncoderCount(ENCODER_LEFT, 0);
+    state_pos[1] = state_pos[1]+getEncoderCount(ENCODER_RIGHT, 1);
   }
   else if (linear < -1){
     analogWrite(MOTOR_PIN_2, -linear);
     analogWrite(MOTOR_PIN_1, 0);
+    state_pos[0] = state_pos[0]-getEncoderCount(ENCODER_LEFT, 0);
+    state_pos[1] = state_pos[1]-getEncoderCount(ENCODER_RIGHT, 1);
   }
   else if (linear == 0){
     analogWrite(MOTOR_PIN_2, 0);
@@ -52,10 +54,8 @@ ros::Subscriber<geometry_msgs::Twist> drive_sub("cmd_vel", drive_cb);
 void setup() {
   pinMode(MOTOR_PIN_1, OUTPUT);
   pinMode(MOTOR_PIN_2, OUTPUT);
-  pinMode(ENCODER_RIGHT_A, INPUT);
-  pinMode(ENCODER_RIGHT_B, INPUT);
-  pinMode(ENCODER_LEFT_A, INPUT);
-  pinMode(ENCODER_LEFT_B, INPUT);
+  pinMode(ENCODER_LEFT, INPUT);
+  pinMode(ENCODER_RIGHT, INPUT);
   rudder.attach(RUDDER_PIN);
   rudder.write(1500);
 
@@ -75,29 +75,29 @@ void setup() {
   state_msg.effort = state_eff;
   }
 
-void loop(){
+void loop(){ 
   if((millis() - last_ms) >= RATE_MS){
     last_ms = millis();
-    state_pos[0] = -encoderCount(ENCODER_LEFT_A, ENCODER_LEFT_B, 0);  //left
-    state_pos[1] = encoderCount(ENCODER_RIGHT_A, ENCODER_RIGHT_B, 0); //right
-    state_pos[2] = angular;
+    state_pos[2] = angular; 
     state_msg.header.stamp = nh.now();
     state_pub.publish(&state_msg);
+    state_pos[0] = 0;
+    state_pos[1] = 0;
   }
   nh.spinOnce();
-  delay(5);
+  //delay(5);
 }
 
-int encoderCount(int encoderA, int encoderB, int side) {
+int getEncoderCount(int encoder, int side)
+{
   int count = 0;
-  int n = digitalRead(encoderA);
-  if ((encodersALast[side] == LOW) && (n == HIGH)) {
-    if (digitalRead(encoderB) == LOW) {
-      count--;
-    } else {
-      count++;
+  if (digitalRead(encoder)==HIGH)
+    {
+    encodersFlag[side]=HIGH;
     }
-  }
-  encodersALast[side] = n;
-  return count;
+  if (digitalRead(encoder)==LOW && encodersFlag[side]==HIGH)
+    {
+    count++;
+    encodersFlag[side]=LOW;
+    }
 }
