@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>futs_qt_odometry</name>
+  <name>odometry</name>
   <version>0.1.0</version>
-  <description>The futs_qt_odometry package</description>
+  <description>The odometry package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
