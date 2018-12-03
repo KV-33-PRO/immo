@@ -3,18 +3,26 @@
 #include <geometry_msgs/Twist.h>
 #include <sensor_msgs/JointState.h>
 
-#define RATE_MS          20
-#define MOTOR_PIN_1      9
-#define MOTOR_PIN_2      10
-#define RUDDER_PIN       8
-#define ENCODER_LEFT     2
-#define ENCODER_RIGHT    3
-#define NUM_JOINTS       3
+#define RATE_MS                 20    // задержка для публикации
 
-bool encodersFlag[2] = {LOW, LOW}; //0-LEFT, 1-RIGHT
+#define RUDDER_PIN              11    // подключение сервопривода
+#define GRAD_RUDDER             65.0  // угол поворота колес между положениями "влево" - "вправо" (в градусах)
+
+#define MOTOR_PIN_1             5     // двигатель +/-
+#define MOTOR_PIN_2             6     // двигатель -/+
+#define ENCODER_LEFT            2     // прерывание на пине 2
+#define ENCODER_RIGHT           3     // прерывание на пине 3
+#define DIRECTION_MOTOR_LEFT    7     // выход с левого мотора (для направления движения)
+#define DIRECTION_MOTOR_RIGHT   8     // выход с правого мотора (для направления движения) 
+
+#define D_WHEEL                 0.151 // диаметр колеса (в метрах)
+#define COUNT_ENCODER_WHEEL     3000  // число импульсов на один оборот колеса
+
+#define NUM_JOINTS              3
+
 char *state_names[NUM_JOINTS] = {"left_wheel", "right_wheel", "rudder"};
 float state_pos[NUM_JOINTS] = {0, 0, 0};
-float state_vel[NUM_JOINTS] = {0, 0, 0};
+float state_vel[NUM_JOINTS] = {0, 0, 0};  //rad/s
 float state_eff[NUM_JOINTS] = {0, 0, 0};
 unsigned long last_ms;
 
@@ -24,27 +32,23 @@ Servo rudder;
 float linear;
 float angular;
 
-void drive_cb(const geometry_msgs::Twist& cmd_vel){
+void drive_cb(const geometry_msgs::Twist& cmd_vel) {
   linear = map(cmd_vel.linear.x * 1000, -1000, 1000, -255, 255);
   angular = map(cmd_vel.angular.z * 1000, -3000, 3000, 1000, 2000);
   rudder.write(angular);
-  if (linear > 1){
+  if (linear > 1) {
     analogWrite(MOTOR_PIN_1, linear);
     analogWrite(MOTOR_PIN_2, 0);
-    state_pos[0] = state_pos[0]+getEncoderCount(ENCODER_LEFT, 0);
-    state_pos[1] = state_pos[1]+getEncoderCount(ENCODER_RIGHT, 1);
   }
-  else if (linear < -1){
+  else if (linear < -1) {
     analogWrite(MOTOR_PIN_2, -linear);
     analogWrite(MOTOR_PIN_1, 0);
-    state_pos[0] = state_pos[0]-getEncoderCount(ENCODER_LEFT, 0);
-    state_pos[1] = state_pos[1]-getEncoderCount(ENCODER_RIGHT, 1);
   }
-  else if (linear == 0){
+  else if (linear == 0) {
     analogWrite(MOTOR_PIN_2, 0);
     analogWrite(MOTOR_PIN_1, 0);
-    }
   }
+}
 
 sensor_msgs::JointState state_msg;
 
@@ -56,10 +60,14 @@ void setup() {
   pinMode(MOTOR_PIN_2, OUTPUT);
   pinMode(ENCODER_LEFT, INPUT);
   pinMode(ENCODER_RIGHT, INPUT);
+  pinMode(DIRECTION_MOTOR_LEFT, INPUT);
+  pinMode(DIRECTION_MOTOR_RIGHT, INPUT);
   rudder.attach(RUDDER_PIN);
   rudder.write(1500);
+  attachInterrupt(0, doEncoderLeft, FALLING);  //pin2
+  attachInterrupt(1, doEncoderRight, FALLING); //pin3
 
-  //nh.getHardware()->setBaud(500000);
+  nh.getHardware()->setBaud(500000);
   nh.initNode();
   nh.subscribe(drive_sub);
   nh.advertise(state_pub);
@@ -73,31 +81,50 @@ void setup() {
   state_msg.position = state_pos;
   state_msg.velocity = state_vel;
   state_msg.effort = state_eff;
-  }
-
-void loop(){ 
-  if((millis() - last_ms) >= RATE_MS){
-    last_ms = millis();
-    state_pos[2] = angular; 
-    state_msg.header.stamp = nh.now();
-    state_pub.publish(&state_msg);
-    state_pos[0] = 0;
-    state_pos[1] = 0;
-  }
-  nh.spinOnce();
-  //delay(5);
 }
 
-int getEncoderCount(int encoder, int side)
+void loop() {
+  if ((millis() - last_ms) >= RATE_MS) {
+    last_ms = millis();
+    state_pos[2] = -((angular - 1500) * (GRAD_RUDDER / 1000)) * M_PI / 180; //преобразование значения с сервы(1000..2000) > (-500..500) > градусы > радианы
+
+    //тут надо пересчитать Velocity в радианы...
+    state_vel[0] = (state_vel[0] / COUNT_ENCODER_WHEEL) * M_PI * D_WHEEL; //пройденный путь в метрах
+    state_vel[1] = (state_vel[1] / COUNT_ENCODER_WHEEL) * M_PI * D_WHEEL; //пройденный путь в метрах
+
+    state_msg.header.stamp = nh.now();
+    state_pub.publish(&state_msg);
+    state_pos[2] = 0;
+  }
+  nh.spinOnce();
+}
+
+// Interrupt on B changing state
+void doEncoderLeft() {
+  state_vel[0] += getEncoderCount(DIRECTION_MOTOR_LEFT, 0);
+}
+void doEncoderRight() {
+  state_vel[1] += getEncoderCount(DIRECTION_MOTOR_RIGHT, 1);
+}
+
+int getEncoderCount(int direction_motor, int side)
 {
   int count = 0;
-  if (digitalRead(encoder)==HIGH)
-    {
-    encodersFlag[side]=HIGH;
-    }
-  if (digitalRead(encoder)==LOW && encodersFlag[side]==HIGH)
-    {
+  if (digitalRead(direction_motor) == HIGH & side == 0)
+  {
     count++;
-    encodersFlag[side]=LOW;
-    }
+  }
+  else
+  {
+    count--;
+  }
+  if (digitalRead(direction_motor) == HIGH & side == 1)
+  {
+    count--;
+  }
+  else
+  {
+    count++;
+  }
+  return count;
 }

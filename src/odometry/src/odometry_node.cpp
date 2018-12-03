@@ -4,10 +4,9 @@
 #include <sensor_msgs/JointState.h>
 #include <geometry_msgs/Quaternion.h>
 
-double aw  = 0.7;   // межосевое расстояние (в метрах)
-double d = 0.2;     // диаметр колеса (в метрах)
-double g  = 90.0;   // угол поворота колес между положениями "вправо" - "влево" (в градусах)
-int n = 10;         // число импульсов на один оборот колеса
+double aw  = 0.333;   // межосевое расстояние (в метрах)
+double d = 0.151;     // диаметр колеса (в метрах)
+int n = 10;           // число импульсов на один оборот колеса
 
 double x  = 0.0;
 double y  = 0.0;
@@ -30,10 +29,11 @@ void jointStatesCallback(const sensor_msgs::JointState& msg)
     s = 0;
     for(int i = 0; i < msg.name.size(); i++){
       if(msg.name[i].compare("left_wheel") == 0 & msg.name[i+1].compare("right_wheel") == 0) {
+          // надо перевести радианы в метры
           s = (((msg.velocity[i]+msg.velocity[i+1])/2)/n)*M_PI*d;   //пройденный путь в метрах
           i++;
       } else if(msg.name[i].compare("rudder") == 0) {
-          angular = ((msg.position[i]-1000)*(g/1000))*M_PI/180;   //преобразование значения с сервы(1000-2000) > градусы > радианы
+          angular = msg.position[i];
       }
     }
 
