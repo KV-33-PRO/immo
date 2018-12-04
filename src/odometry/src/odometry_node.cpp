@@ -6,7 +6,6 @@
 
 double aw  = 0.333;   // межосевое расстояние (в метрах)
 double d = 0.151;     // диаметр колеса (в метрах)
-int n = 10;           // число импульсов на один оборот колеса
 
 double x  = 0.0;
 double y  = 0.0;
@@ -18,33 +17,33 @@ double vth = 0.0;   // radian/s
 
 ros::Time prev_time;
 
-double s  = 0.0;
+double dist  = 0.0;
 double angular  = 0.0;
+
 
 void jointStatesCallback(const sensor_msgs::JointState& msg)
 {
   double dt = (msg.header.stamp - prev_time).toSec();
   if(dt < 10 && dt > 0) {
     angular = 0;
-    s = 0;
+    dist = 0;
     for(int i = 0; i < msg.name.size(); i++){
       if(msg.name[i].compare("left_wheel") == 0 & msg.name[i+1].compare("right_wheel") == 0) {
-          // надо перевести радианы в метры
-          s = (((msg.velocity[i]+msg.velocity[i+1])/2)/n)*M_PI*d;   //пройденный путь в метрах
+          dist = ((msg.velocity[i]+msg.velocity[i+1])/2)*dt*(d/2);   // Перевод рад/с > рад > метры   (пройденный путь)
           i++;
       } else if(msg.name[i].compare("rudder") == 0) {
-          angular = msg.position[i];
+          angular = msg.position[i];  //радиан
       }
     }
 
     double delta_th;
     if(angular != 0) {
-      delta_th = s/(aw/tan(angular));
+      delta_th = dist/(aw/tan(angular));
     } else {
       delta_th = 0;
     }
-    double delta_x = s * cos(th + delta_th/2);
-    double delta_y = s * sin(th + delta_th/2);
+    double delta_x = dist * cos(th + delta_th/2);
+    double delta_y = dist * sin(th + delta_th/2);
 
     x += delta_x;
     y += delta_y;
@@ -55,7 +54,7 @@ void jointStatesCallback(const sensor_msgs::JointState& msg)
     vth = delta_th/dt;
   }
   prev_time = msg.header.stamp;
-  ROS_INFO("Angular: %0.2f; Velocity: %0.2f; Time (dt): %0.4f; X: %0.2f; Y: %0.2f; Th: %0.2f", angular, s, dt, x, y, th);
+  ROS_INFO("Angular: %0.2f; Velocity: %0.2f; Time (dt): %0.4f; X: %0.2f; Y: %0.2f; Th: %0.2f", angular, dist, dt, x, y, th);
 }
 
 int main(int argc, char** argv){

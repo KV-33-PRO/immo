@@ -7,6 +7,7 @@
 
 #define RUDDER_PIN              11    // подключение сервопривода
 #define GRAD_RUDDER             65.0  // угол поворота колес между положениями "влево" - "вправо" (в градусах)
+#define COUNT_ENCODER_WHEEL     3000  // число импульсов на один оборот колеса
 
 #define MOTOR_PIN_1             5     // двигатель +/-
 #define MOTOR_PIN_2             6     // двигатель -/+
@@ -14,9 +15,6 @@
 #define ENCODER_RIGHT           3     // прерывание на пине 3
 #define DIRECTION_MOTOR_LEFT    7     // выход с левого мотора (для направления движения)
 #define DIRECTION_MOTOR_RIGHT   8     // выход с правого мотора (для направления движения) 
-
-#define D_WHEEL                 0.151 // диаметр колеса (в метрах)
-#define COUNT_ENCODER_WHEEL     3000  // число импульсов на один оборот колеса
 
 #define NUM_JOINTS              3
 
@@ -84,13 +82,13 @@ void setup() {
 }
 
 void loop() {
-  if ((millis() - last_ms) >= RATE_MS) {
+    unsigned long t = millis() - last_ms;
+  if ((t) >= RATE_MS) {
     last_ms = millis();
-    state_pos[2] = -((angular - 1500) * (GRAD_RUDDER / 1000)) * M_PI / 180; //преобразование значения с сервы(1000..2000) > (-500..500) > градусы > радианы
 
-    //тут надо пересчитать Velocity в радианы...
-    state_vel[0] = (state_vel[0] / COUNT_ENCODER_WHEEL) * M_PI * D_WHEEL; //пройденный путь в метрах
-    state_vel[1] = (state_vel[1] / COUNT_ENCODER_WHEEL) * M_PI * D_WHEEL; //пройденный путь в метрах
+    state_vel[0] = ((((state_vel[0] / (COUNT_ENCODER_WHEEL / 360)) * M_PI) / 180) / t) * (1000/t);   //преобразование импульсы > градусы > радианы > рад/с
+    state_vel[1] = ((((state_vel[1] / (COUNT_ENCODER_WHEEL / 360)) * M_PI) / 180) / t) * (1000/t);   //преобразование импульсы > градусы > радианы > рад/с
+    state_pos[2] = -((angular - 1500) * (GRAD_RUDDER / 1000)) * M_PI / 180; //преобразование значения с сервы(1000..2000) > (-500..500) > градусы > радианы
 
     state_msg.header.stamp = nh.now();
     state_pub.publish(&state_msg);
