@@ -25,9 +25,8 @@ NewPing sonar_r(6, 5);
 void setup()
 { 
 
-  
+  nh.getHardware()->setBaud(500000);
   nh.initNode();
-
   nh.advertise(ir_l_pub);
   nh.advertise(ir_r_pub);
   nh.advertise(snr_l_pub);
