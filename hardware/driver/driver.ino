@@ -1,22 +1,29 @@
-#include <Servo.h>
 #include <ros.h>
 #include <geometry_msgs/Twist.h>
 #include <sensor_msgs/JointState.h>
+#include <DynamixelSoftSerial.h>
+#include <SoftwareSerial.h>
 
-#define RATE_MS                 20    // задержка для публикации
+#define RATE_MS                   20    // задержка для публикации
 
-#define RUDDER_PIN              11    // подключение сервопривода
-#define GRAD_RUDDER             65.0  // угол поворота колес между положениями "влево" - "вправо" (в градусах)
-#define COUNT_ENCODER_WHEEL     3000  // число импульсов на один оборот колеса
+#define WHEEL_IMPULSE_COUNT       172   // Количество импульсов на оборот колеса
+#define GRAD_RUDDER               65.0  // угол поворота колес между положениями "влево" - "вправо" (в градусах)
+#define RUDDER_DATA_CONTROL_PIN   4     // pin control for data transmission and recepcionde
+#define RUDDER_RX_PIN             7     // softSerial RX pin для подключения Dynamixel AX-12a
+#define RUDDER_TX_PIN             8     // softSerial TX pin для подключения Dynamixel AX-12a
+#define DYNAMIXEL_ID              3     // dynamixel AX-12a
 
-#define MOTOR_PIN_1             5     // двигатель +/-
-#define MOTOR_PIN_2             6     // двигатель -/+
-#define ENCODER_LEFT            2     // прерывание на пине 2
-#define ENCODER_RIGHT           3     // прерывание на пине 3
-#define DIRECTION_MOTOR_LEFT    7     // выход с левого мотора (для направления движения)
-#define DIRECTION_MOTOR_RIGHT   8     // выход с правого мотора (для направления движения) 
+//http://savageelectronics.blogspot.com/2011/08/actualizacion-biblioteca-dynamixel.html
+//http://hobbytech.com.ua/dynamixel-ax-12a-%D0%B8-arduino-%D0%BA%D0%B0%D0%BA-%D0%B8%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D1%82%D1%8C-%D0%BF%D0%BE%D1%81%D0%BB%D0%B5%D0%B4%D0%BE%D0%B2%D0%B0%D1%82%D0%B5%D0%BB/
 
-#define NUM_JOINTS              3
+#define ENCODER_LEFT              2     // прерывание на пине 2
+#define ENCODER_RIGHT             3     // прерывание на пине 3
+#define MOTOR_PIN_1               5     // двигатель +/-
+#define MOTOR_PIN_2               6     // двигатель -/+
+#define DIRECTION_MOTOR_LEFT      9     // выход с левого мотора (для направления движения)
+#define DIRECTION_MOTOR_RIGHT     10    // выход с правого мотора (для направления движения) 
+
+#define NUM_JOINTS                3
 
 char *state_names[NUM_JOINTS] = {"left_wheel", "right_wheel", "rudder"};
 float state_pos[NUM_JOINTS] = {0, 0, 0};
@@ -26,14 +33,13 @@ unsigned long last_ms;
 
 ros::NodeHandle nh;
 
-Servo rudder;
 float linear;
 float angular;
 
 void drive_cb(const geometry_msgs::Twist& cmd_vel) {
   linear = map(cmd_vel.linear.x * 1000, -1000, 1000, -255, 255);
-  angular = map(cmd_vel.angular.z * 1000, -3000, 3000, 1000, 2000);
-  rudder.write(angular);
+  angular = cmd_vel.angular.z;
+  Dynamixel.move(DYNAMIXEL_ID, angular2dynamixel(angular));
   if (linear > 1) {
     analogWrite(MOTOR_PIN_1, linear);
     analogWrite(MOTOR_PIN_2, 0);
@@ -60,11 +66,12 @@ void setup() {
   pinMode(ENCODER_RIGHT, INPUT);
   pinMode(DIRECTION_MOTOR_LEFT, INPUT);
   pinMode(DIRECTION_MOTOR_RIGHT, INPUT);
-  rudder.attach(RUDDER_PIN);
-  rudder.write(1500);
-  attachInterrupt(0, doEncoderLeft, FALLING);  //pin2
-  attachInterrupt(1, doEncoderRight, FALLING); //pin3
-
+  attachInterrupt(0, doEncoderLeft, CHANGE);  //pin2
+  attachInterrupt(1, doEncoderRight, CHANGE); //pin3
+  
+  Dynamixel.begin(115200, RUDDER_RX_PIN, RUDDER_TX_PIN, RUDDER_DATA_CONTROL_PIN);
+  Dynamixel.move(DYNAMIXEL_ID, 512);
+  
   nh.getHardware()->setBaud(500000);
   nh.initNode();
   nh.subscribe(drive_sub);
@@ -85,44 +92,79 @@ void loop() {
     unsigned long t = millis() - last_ms;
   if ((t) >= RATE_MS) {
     last_ms = millis();
-
-    state_vel[0] = ((((state_vel[0] / (COUNT_ENCODER_WHEEL / 360)) * M_PI) / 180) / t) * (1000/t);   //преобразование импульсы > градусы > радианы > рад/с
-    state_vel[1] = ((((state_vel[1] / (COUNT_ENCODER_WHEEL / 360)) * M_PI) / 180) / t) * (1000/t);   //преобразование импульсы > градусы > радианы > рад/с
-    state_pos[2] = -((angular - 1500) * (GRAD_RUDDER / 1000)) * M_PI / 180; //преобразование значения с сервы(1000..2000) > (-500..500) > градусы > радианы
-
+    state_pos[0] = impulse2radian(state_pos[0]);     //rad
+    state_pos[1] = impulse2radian(state_pos[1]);     
+    state_pos[2] = angular;                          //rad
+    state_vel[0] = state_pos[0]/(t/1000.0);          //rad/s
+    state_vel[1] = state_pos[1]/(t/1000.0);   
     state_msg.header.stamp = nh.now();
     state_pub.publish(&state_msg);
+    state_pos[0] = 0;
+    state_pos[1] = 0;
     state_pos[2] = 0;
   }
   nh.spinOnce();
 }
 
-// Interrupt on B changing state
+float impulse2radian(int x){
+  return (x / (WHEEL_IMPULSE_COUNT / 360)) * M_PI / 180;  //преобразование импульсы > градусы > радианы
+}
+
+float angular2dynamixel(float angular){
+  float dynamixel_value = 0;
+  float angular_grad = angular*180/M_PI;                     //преобразование радиан > градусы
+  float angular_value_res = ((1023/360)*(GRAD_RUDDER/2));    //значение для динамикселя в одном направлении
+  
+  if (angular_grad >= -(GRAD_RUDDER/2) & angular_grad <= (GRAD_RUDDER/2))   //Если в пределах возможного - ремапим значения для динамикселя
+  {
+    dynamixel_value = map(angular_grad*10, -(GRAD_RUDDER/2)*10, (GRAD_RUDDER/2)*10, 512-angular_value_res, 512+angular_value_res); //ремапим значения угла поворота на значения динамикселя (с ограничением угла поворота до возможного выворота колес)
+  }
+  else 
+  {
+    if (angular_grad < -(GRAD_RUDDER/2))
+    {
+      dynamixel_value = 512-angular_value_res;   //программное ограничение поворота колес на максимальный градус влево
+    }
+    else
+    {
+      dynamixel_value = 512+angular_value_res;   //программное ограничение поворота колес на максимальный градус вправо
+    }
+  }
+  return dynamixel_value;
+}
+
+// Interrupt
 void doEncoderLeft() {
-  state_vel[0] += getEncoderCount(DIRECTION_MOTOR_LEFT, 0);
+  state_pos[0] += getEncoderCount(DIRECTION_MOTOR_LEFT, 0);
 }
 void doEncoderRight() {
-  state_vel[1] += getEncoderCount(DIRECTION_MOTOR_RIGHT, 1);
+  state_pos[1] += getEncoderCount(DIRECTION_MOTOR_RIGHT, 1);
 }
 
 int getEncoderCount(int direction_motor, int side)
 {
   int count = 0;
-  if (digitalRead(direction_motor) == HIGH & side == 0)
-  {
-    count++;
+  // Левое колесо
+  if (side == 0){
+    if (digitalRead(direction_motor) == HIGH)
+    {
+      count++;
+    }
+    else
+    {
+      count--;
+    }
   }
-  else
-  {
-    count--;
-  }
-  if (digitalRead(direction_motor) == HIGH & side == 1)
-  {
-    count--;
-  }
-  else
-  {
-    count++;
+  // Правое колесо
+  if (side == 1){
+    if (digitalRead(direction_motor) == LOW)
+    {
+      count++;
+    }
+    else
+    {
+      count--;
+    }
   }
   return count;
 }
