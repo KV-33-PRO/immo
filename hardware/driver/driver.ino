@@ -14,7 +14,8 @@
 
 #define ENCODER_LEFT_PIN          PA6      // вход с прерыванием для левого энкодера 
 #define ENCODER_RIGHT_PIN         PA7      // вход с прерыванием для правого энкодера 
-#define DIRECTION_MOTOR_PIN       PA3      // выход с мотора (для направления движения)
+#define DIRECTION_MOTOR_FRONT     PA3      // выход с мотора (для направления движения вперед)
+#define DIRECTION_MOTOR_REAR      PA2      // выход с мотора (для направления движения назад)
 #define MOTOR_PIN_1               PB8      // выход на драйвер двигателя 1
 #define MOTOR_PIN_2               PB9      // выход на драйвер двигателя 2
 
@@ -28,7 +29,7 @@ unsigned long last_ms;
 
 ros::NodeHandle nh;
 
-float linear;
+float linear = 0;
 
 //Обработка сообщений из топика "cmd_vel"
 void drive_cb(const geometry_msgs::Twist& cmd_vel) {
@@ -56,7 +57,8 @@ ros::Subscriber<geometry_msgs::Twist> drive_sub("cmd_vel", drive_cb);    //ин�
 void setup() {
   pinMode(MOTOR_PIN_1, OUTPUT);
   pinMode(MOTOR_PIN_2, OUTPUT);
-  pinMode(DIRECTION_MOTOR_PIN, INPUT);
+  pinMode(DIRECTION_MOTOR_FRONT, INPUT);
+  pinMode(DIRECTION_MOTOR_REAR, INPUT);
   attachInterrupt(ENCODER_LEFT_PIN, doEncoderLeft, CHANGE);      //инициализация прерываний для энкодеров
   attachInterrupt(ENCODER_RIGHT_PIN, doEncoderRight, CHANGE);
 
@@ -142,12 +144,21 @@ void doEncoderRight() {
 // Обработчик направления движения
 float getEncoderCount()
 {
-  if (digitalRead(DIRECTION_MOTOR_PIN) == HIGH)
-  {
-    return 1.0;    //движение вперед
-  }
-  else
-  {
-    return -1.0;   //движение назад
+  if (linear != 0) {    //Если сигнал движения есть, то ориентируемся в направлении с помощью него
+    if (linear > 0) {
+      return 1.0;
+    }
+    if (linear < 0) {
+      return -1.0;
+    }
+  } else {              //Нет сигнала движения, но движемся (по инерции или толкают)... ориентируемся по датчику...
+    if (digitalRead(DIRECTION_MOTOR_FRONT) == HIGH & digitalRead(DIRECTION_MOTOR_REAR) == LOW)
+    {
+      return 1.0;
+    }
+    if (digitalRead(DIRECTION_MOTOR_FRONT) == LOW & digitalRead(DIRECTION_MOTOR_REAR) == HIGH)
+    {
+      return -1.0;    //движение назад
+    }
   }
 }
