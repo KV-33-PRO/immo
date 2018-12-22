@@ -1,6 +1,13 @@
 <launch>
+  <!--Запуск соединения с микроконтроллером для управления-->
   <node name="immo_driver" pkg="rosserial_python" type="serial_node.py">
     <param name="port" value="/dev/ttyACM0"/>
     <param name="baud" value="500000"/>
   </node>
+
+<!--НУЖНА ЗАДЕРЖКА-->
+
+    <!--Запуск пересчета одометрии-->
+    <!--<include file="$(find odometry)/launch/odometry.launch" />-->
+
 </launch>

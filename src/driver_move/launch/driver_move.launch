@@ -1,0 +1,4 @@
+<launch>
+   <node pkg="driver_move" type="driver_move_node" name="driver_move_node" output="screen">
+   </node>
+</launch>
