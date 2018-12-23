@@ -6,9 +6,9 @@
 
 #define RATE_MS                   20       // задержка для публикации в топик
 
-#define Kp                        50.0       // пропорциональный коэффициент для ПИД регулятора (41.7)
-#define Ki                        0.8    // интегральный коэффициент для ПИД регулятора
-#define Kd                        -30.0    // дифференциальный коэффициент для ПИД регулятора   
+#define Kp                        167.0       // пропорциональный коэффициент для ПИД регулятора (41.7)
+#define Ki                        0.0    // интегральный коэффициент для ПИД регулятора
+#define Kd                        0.0    // дифференциальный коэффициент для ПИД регулятора   
 
 #define WHEEL_DIAMETER            0.151    // диаметр колеса в метрах
 #define WHEEL_IMPULSE_COUNT       172.0    // количество импульсов на оборот колеса
@@ -221,7 +221,7 @@ int linear2driverMotor(float linear_speed)
 //    return linear*255;
 //  }
   
-  float e = (speed_actual*WHEEL_DIAMETER*M_PI) - linear_speed;       //разница в скорости средней от последней публикации в m/s и желаемая m/s
+  float e = speed_actual*WHEEL_DIAMETER/2 - linear_speed;       //разница в скорости средней от последней публикации в m/s и желаемая m/s
 
   //ПИД регулятор для рассчета значения для драйвера моторов
   float P = Kp * e;
@@ -234,7 +234,7 @@ int linear2driverMotor(float linear_speed)
   speed_actual = 0.0;             //обнуляем значение средней скорости за период обновления cmd_vel в рад в сек...
 
   //Для отладки
-  //state_eff[2]=motor_value;
+  state_eff[2]=motor_value;
 
   int motor_val_min = 45;
   if(motor_value<0 && motor_value>=-motor_val_min){

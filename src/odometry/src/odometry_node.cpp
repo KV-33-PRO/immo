@@ -59,12 +59,11 @@ void jointStatesCallback(const sensor_msgs::JointState& msg)
 
 int main(int argc, char** argv){
   ros::init(argc, argv, "odometry_node");
-
   ros::NodeHandle n;
   ros::Subscriber sub = n.subscribe("joint_states", 10, jointStatesCallback);
   ros::Publisher pub = n.advertise<nav_msgs::Odometry>("odom", 50);
 
-  ros::Rate r(100);
+  ros::Rate r(50);
   while(ros::ok()){
     ros::spinOnce();
     geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(th);
