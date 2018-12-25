@@ -1,6 +1,7 @@
 #include <ros.h>
 #include <sensor_msgs/Range.h>
 #include <Ultrasonic.h>
+#include <SimpleKalmanFilter.h>
 
 #define RATE_MS       20
 
@@ -16,6 +17,8 @@ unsigned long last_ms;
 Ultrasonic sonar_l(PA15, PB3);
 Ultrasonic sonar_r(PB4, PB5);
 
+SimpleKalmanFilter kf_l(2, 2, 0.01);
+SimpleKalmanFilter kf_r(2, 2, 0.01);
 
 void setup()
 {
@@ -54,10 +57,10 @@ void loop()
 
 float getSNRRange(int side) {
   if (side == 0) {
-    return sonar_l.read()/100.0;
+    return kf_l.updateEstimate(sonar_l.read()/100.0);
   }
   else
   {
-    return sonar_r.read()/100.0;
+    return kf_r.updateEstimate(sonar_r.read()/100.0);
   }
 }
