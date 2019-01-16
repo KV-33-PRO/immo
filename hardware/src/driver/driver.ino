@@ -6,9 +6,9 @@
 
 #define RATE_MS                   20       // задержка для публикации в топик
 
-#define Kp                        167.0       // пропорциональный коэффициент для ПИД регулятора (41.7)
-#define Ki                        0.0    // интегральный коэффициент для ПИД регулятора
-#define Kd                        0.0    // дифференциальный коэффициент для ПИД регулятора   
+#define Kp                        167.0    // пропорциональный коэффициент для ПИД регулятора (41.7)
+#define Ki                        0.0      // интегральный коэффициент для ПИД регулятора
+#define Kd                        0.0      // дифференциальный коэффициент для ПИД регулятора   
 
 #define WHEEL_DIAMETER            0.151    // диаметр колеса в метрах
 #define WHEEL_IMPULSE_COUNT       172.0    // количество импульсов на оборот колеса
@@ -17,12 +17,12 @@
 #define DYNAMIXEL_ID              3        // идентификатор dynamixel AX-12a
 #define RUDDER_TX_PIN             PB10     // выход serial3 TX для подключения Dynamixel AX-12a
 #define RUDDER_RX_PIN             PB11     // выход serial3 RX для подключения Dynamixel AX-12a
-#define RUDDER_DATA_CONTROL_PIN   PB12     // выход для переключения между TX и RX (для дуплексной связи)
+#define RUDDER_DATA_CONTROL_PIN   PB1     // выход для переключения между TX и RX (для дуплексной связи)
 
 #define ENCODER_LEFT_PIN          PA6      // вход с прерыванием для левого энкодера 
-#define ENCODER_RIGHT_PIN         PA7      // вход с прерыванием для правого энкодера 
-#define DIRECTION_MOTOR_FRONT     PA4      // выход с мотора (для направления движения вперед)
-#define DIRECTION_MOTOR_REAR      PA5      // выход с мотора (для направления движения назад)
+#define ENCODER_RIGHT_PIN         PB0      // вход с прерыванием для правого энкодера 
+#define DIRECTION_MOTOR_FRONT     PA5      // выход с мотора (для направления движения вперед)
+#define DIRECTION_MOTOR_REAR      PA4      // выход с мотора (для направления движения назад)
 #define MOTOR_PIN_1               PB8      // выход на драйвер мотора 1
 #define MOTOR_PIN_2               PB9      // выход на драйвер мотора 2
 
@@ -34,6 +34,8 @@
 #define BAT_VOLTAGE_MAX           16.8     // максимальный вольтаж батареи (для расчета процентов)
 #define BAT_VOLTAGE_MIN           14.0     // минимальный вольтаж батареи (для расчета процентов)
 #define CELL_BAT                  4        // количество банок аккумулятора
+
+//#define PIN_LEDS    PA7     //Library uses SPI1. Connect the WS2812B data input to MOSI on your board. (STM32: PA7)
 
 #define NUM_JOINTS                3
 

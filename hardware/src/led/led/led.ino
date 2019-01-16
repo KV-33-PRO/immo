@@ -1,7 +1,7 @@
 #include <WS2812B.h>
 
-#define NUM_LEDS    6
-#define COUNT_LEDS_HEADLIGHT    3
+#define NUM_LEDS    20
+#define COUNT_LEDS_HEADLIGHT    5
 //#define PIN_LEDS    PA7     //Library uses SPI1. Connect the WS2812B data input to MOSI on your board. (STM32: PA7)
 
 WS2812B strip = WS2812B(NUM_LEDS);
@@ -12,7 +12,7 @@ uint32_t blue = strip.Color(0, 0, 255);
 uint32_t white = strip.Color(255, 255, 255);
 uint32_t black = strip.Color(0, 0, 0);
 
-int leds[4][COUNT_LEDS_HEADLIGHT] = {{2, 1, 0}, {3, 4, 5}, {2, 1, 0}, {3, 4, 5}};  //0 - левая передная, 1 - правая передняя, 2 - левая задняя, 3 - правая задняя
+int leds[4][COUNT_LEDS_HEADLIGHT] = {{4, 3, 2, 1, 0}, {5, 6, 7, 8, 9}, {14 ,13 ,12, 11, 10}, {15, 16, 17, 18, 19}};  //0 - левая передная, 1 - правая передняя, 2 - левая задняя, 3 - правая задняя
 
 void setup()
 {
@@ -30,6 +30,13 @@ void loop()
 
   stopBlink();
   delay(2000);
+
+  stripShowColor(4, 0, 1, 2, 3, black);
+  delay(500);
+
+  blinkerLamps(3, 0, false);
+
+  blinkerLamps(3, 1, false);
 
   stripShowColor(4, 0, 1, 2, 3, black);
   delay(2000);
@@ -143,11 +150,11 @@ void stopBlink()
 //Белый свет
 void headLamps(int direction)
 {
-  if (direction = 0)
+  if (direction == 0)
   {
     stripShowColor(2, 0, 1, 0, 0, white); //Передние фары
   }
-  if (direction = 1)
+  if (direction == 1)
   {
     stripShowColor(2, 2, 3, 0, 0, white); //Задние фонари
   }
