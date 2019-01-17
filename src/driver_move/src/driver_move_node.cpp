@@ -64,8 +64,18 @@ public:
 int main(int argc, char **argv) {
     ros::init(argc, argv, "driver_move_node");
     ros::NodeHandle n;
-    //rudder, speed, distantion
-    DriverMove move(0.0, 0.5, 2.0, n);
+
+    ros::NodeHandle priv_nh("~");
+
+    double speed;
+    double rudder;
+    double distantion;
+
+    priv_nh.param("speed", speed, 0.0);
+    priv_nh.param("rudder", rudder, 0.0);
+    priv_nh.param("distantion", distantion, 0.0);
+
+    DriverMove move(rudder, speed, distantion, n);
     while(ros::ok()){
     move.moveGoal();
     }
