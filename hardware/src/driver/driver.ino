@@ -9,15 +9,17 @@
 #define Kp                        167.0    // пропорциональный коэффициент для ПИД регулятора (41.7)
 #define Ki                        0.0      // интегральный коэффициент для ПИД регулятора
 #define Kd                        0.0      // дифференциальный коэффициент для ПИД регулятора   
+#define K_SPEED                   0.63     // коэффициент неадекватной скорости
 
 #define WHEEL_DIAMETER            0.151    // диаметр колеса в метрах
 #define WHEEL_IMPULSE_COUNT       172.0    // количество импульсов на оборот колеса
 #define GRAD_RUDDER               45.0     // угол поворота колес в одну сторону (от центра до максимального выворота (в градусах))
+#define DUNAMIXEL_CENTER          517      // значение центрального положения колес (в значениях динамикселя)
 
-#define DYNAMIXEL_ID              3        // идентификатор dynamixel AX-12a
+#define DYNAMIXEL_ID              19       // идентификатор dynamixel AX-12a
 #define RUDDER_TX_PIN             PB10     // выход serial3 TX для подключения Dynamixel AX-12a
 #define RUDDER_RX_PIN             PB11     // выход serial3 RX для подключения Dynamixel AX-12a
-#define RUDDER_DATA_CONTROL_PIN   PB1     // выход для переключения между TX и RX (для дуплексной связи)
+#define RUDDER_DATA_CONTROL_PIN   PB1      // выход для переключения между TX и RX
 
 #define ENCODER_LEFT_PIN          PA6      // вход с прерыванием для левого энкодера 
 #define ENCODER_RIGHT_PIN         PB0      // вход с прерыванием для правого энкодера 
@@ -103,7 +105,7 @@ void setup() {
     Dynamixel.ledStatus(DYNAMIXEL_ID, OFF);
     delay(100);
   }
-  Dynamixel.move(DYNAMIXEL_ID, 512);       //установить dynamixel в центральное положение
+  Dynamixel.move(DYNAMIXEL_ID, DUNAMIXEL_CENTER);       //установить dynamixel в центральное положение
 
   nh.getHardware()->setBaud(500000);
   nh.initNode();
@@ -191,7 +193,7 @@ float angular2dynamixel(float angular) {
   if (angular_grad >= -(GRAD_RUDDER) && angular_grad <= (GRAD_RUDDER))    //если в пределах возможного - ремапим значения для динамикселя
   {
     state_pos[2] = angular;     //фиксируем положение динамикселя для сообщения
-    return map(angular_grad * 100.0, -(GRAD_RUDDER) * 100.0, (GRAD_RUDDER) * 100.0, round(512 - angular_value_res), round(512 + angular_value_res)); //ремапим значения угла поворота на значения динамикселя (с ограничением угла поворота до возможного выворота колес)
+    return map(angular_grad * 100.0, -(GRAD_RUDDER) * 100.0, (GRAD_RUDDER) * 100.0, round(DUNAMIXEL_CENTER - angular_value_res), round(DUNAMIXEL_CENTER + angular_value_res)); //ремапим значения угла поворота на значения динамикселя (с ограничением угла поворота до возможного выворота колес)
   }
   else
   {
@@ -199,12 +201,12 @@ float angular2dynamixel(float angular) {
     if (angular_grad < -(GRAD_RUDDER))
     {
       state_pos[2] = -GRAD_RUDDER * M_PI / 180.0;    //фиксируем положение динамикселя для сообщения
-      return round(512 - angular_value_res);    //программное ограничение поворота колес на максимальный градус влево
+      return round(DUNAMIXEL_CENTER - angular_value_res);    //программное ограничение поворота колес на максимальный градус влево
     }
     else
     {
       state_pos[2] = GRAD_RUDDER * M_PI / 180.0;     //фиксируем положение динамикселя для сообщения
-      return round(512 + angular_value_res);    //программное ограничение поворота колес на максимальный градус вправо
+      return round(DUNAMIXEL_CENTER + angular_value_res);    //программное ограничение поворота колес на максимальный градус вправо
     }
   }
 }
@@ -218,12 +220,7 @@ int linear2driverMotor(float linear_speed)
     return 0;
   }
   
-// TODO
-//  if (speed_actual==0.0){
-//    return linear*255;
-//  }
-  
-  float e = speed_actual*WHEEL_DIAMETER/2 - linear_speed;       //разница в скорости средней от последней публикации в m/s и желаемая m/s
+  float e = speed_actual*WHEEL_DIAMETER/2 - linear_speed*K_SPEED;       //разница в скорости средней от последней публикации в m/s и желаемая m/s
 
   //ПИД регулятор для рассчета значения для драйвера моторов
   float P = Kp * e;
