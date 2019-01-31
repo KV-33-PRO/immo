@@ -11660,6 +11660,46 @@ W = angled&lt;p&gt;
 </deviceset>
 </devicesets>
 </library>
+<library name="switch-omron">
+<description>&lt;b&gt;Omron Switches&lt;/b&gt;&lt;p&gt;
+&lt;author&gt;Created by librarian@cadsoft.de&lt;/author&gt;</description>
+<packages>
+</packages>
+<symbols>
+<symbol name="D-TS">
+<wire x1="0" y1="-3.175" x2="0" y2="-2.54" width="0.254" layer="95"/>
+<wire x1="0" y1="2.54" x2="0" y2="3.175" width="0.254" layer="95"/>
+<wire x1="0" y1="-2.54" x2="-0.635" y2="0" width="0.254" layer="95"/>
+<wire x1="-4.445" y1="1.905" x2="-3.175" y2="1.905" width="0.254" layer="95"/>
+<wire x1="-4.445" y1="1.905" x2="-4.445" y2="0" width="0.254" layer="95"/>
+<wire x1="-4.445" y1="-1.905" x2="-3.175" y2="-1.905" width="0.254" layer="95"/>
+<wire x1="-4.445" y1="0" x2="-3.175" y2="0" width="0.1524" layer="95"/>
+<wire x1="-4.445" y1="0" x2="-4.445" y2="-1.905" width="0.254" layer="95"/>
+<wire x1="-2.54" y1="0" x2="-1.905" y2="0" width="0.1524" layer="95"/>
+<wire x1="-1.27" y1="0" x2="-0.635" y2="0" width="0.1524" layer="95"/>
+<wire x1="-0.635" y1="0" x2="-1.27" y2="2.54" width="0.254" layer="95"/>
+<wire x1="0" y1="-3.175" x2="0" y2="-5.08" width="0.1524" layer="95"/>
+<wire x1="0" y1="3.175" x2="0" y2="5.08" width="0.1524" layer="95"/>
+<text x="-6.35" y="-1.905" size="1.778" layer="95" rot="R90">&gt;NAME</text>
+<text x="-3.81" y="3.175" size="1.778" layer="96" rot="R90">&gt;VALUE</text>
+</symbol>
+</symbols>
+<devicesets>
+<deviceset name="D-TS" prefix="S" uservalue="yes">
+<description>&lt;b&gt;SWITCH&lt;/b&gt;</description>
+<gates>
+<gate name="G$1" symbol="D-TS" x="0" y="0"/>
+</gates>
+<devices>
+<device name="">
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+</devicesets>
+</library>
 </libraries>
 <attributes>
 </attributes>
@@ -11725,12 +11765,12 @@ W = angled&lt;p&gt;
 <part name="P+13" library="supply1" deviceset="+5V" device=""/>
 <part name="P+14" library="supply1" deviceset="+5V" device=""/>
 <part name="P+15" library="supply1" deviceset="+5V" device=""/>
-<part name="PAD1" library="wirepad" deviceset="WIREPAD" device="4,16O1,6"/>
-<part name="PAD2" library="wirepad" deviceset="WIREPAD" device="4,16O1,6"/>
+<part name="SWITCH_PIN2" library="wirepad" deviceset="WIREPAD" device="4,16O1,6"/>
+<part name="BATTERY+" library="wirepad" deviceset="WIREPAD" device="4,16O1,6"/>
 <part name="GND11" library="supply1" deviceset="GND" device=""/>
 <part name="P+3" library="supply1" deviceset="VCC" device=""/>
-<part name="PAD3" library="wirepad" deviceset="WIREPAD" device="4,16O1,6"/>
-<part name="PAD4" library="wirepad" deviceset="WIREPAD" device="4,16O1,6"/>
+<part name="BATTERY-" library="wirepad" deviceset="WIREPAD" device="4,16O1,6"/>
+<part name="SWITCH_PIN1" library="wirepad" deviceset="WIREPAD" device="4,16O1,6"/>
 <part name="P+16" library="supply1" deviceset="+18V" device=""/>
 <part name="GND13" library="supply1" deviceset="GND" device=""/>
 <part name="P+17" library="supply1" deviceset="+18V" device=""/>
@@ -11741,6 +11781,7 @@ W = angled&lt;p&gt;
 <part name="C4" library="resistor" deviceset="CPOL-EU" device="E5-8.5"/>
 <part name="C5" library="resistor" deviceset="CPOL-EU" device="E5-8.5"/>
 <part name="C6" library="resistor" deviceset="CPOL-EU" device="E2.5-5"/>
+<part name="SWITCH" library="switch-omron" deviceset="D-TS" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -11913,15 +11954,16 @@ W = angled&lt;p&gt;
 <plain>
 </plain>
 <instances>
-<instance part="PAD1" gate="G$1" x="40.64" y="17.78"/>
-<instance part="PAD2" gate="G$1" x="40.64" y="7.62" rot="R180"/>
-<instance part="P+3" gate="VCC" x="12.7" y="22.86"/>
-<instance part="PAD3" gate="G$1" x="40.64" y="-12.7"/>
-<instance part="PAD4" gate="G$1" x="40.64" y="-2.54" rot="R180"/>
+<instance part="SWITCH_PIN2" gate="G$1" x="40.64" y="17.78"/>
+<instance part="BATTERY+" gate="G$1" x="30.48" y="-12.7" rot="R180"/>
+<instance part="P+3" gate="VCC" x="5.08" y="30.48"/>
+<instance part="BATTERY-" gate="G$1" x="40.64" y="-12.7"/>
+<instance part="SWITCH_PIN1" gate="G$1" x="30.48" y="17.78" rot="R180"/>
 <instance part="P+17" gate="1" x="60.96" y="30.48"/>
 <instance part="GND14" gate="1" x="60.96" y="-20.32"/>
 <instance part="C5" gate="G$1" x="55.88" y="5.08"/>
-<instance part="C6" gate="G$1" x="60.96" y="5.08"/>
+<instance part="C6" gate="G$1" x="66.04" y="5.08"/>
+<instance part="SWITCH" gate="G$1" x="35.56" y="17.78" rot="R270"/>
 </instances>
 <busses>
 </busses>
@@ -11930,40 +11972,42 @@ W = angled&lt;p&gt;
 <segment>
 <pinref part="GND14" gate="1" pin="GND"/>
 <wire x1="60.96" y1="-12.7" x2="60.96" y2="-17.78" width="0.1524" layer="91"/>
-<pinref part="PAD3" gate="G$1" pin="P"/>
+<pinref part="BATTERY-" gate="G$1" pin="P"/>
 <wire x1="43.18" y1="-12.7" x2="60.96" y2="-12.7" width="0.1524" layer="91"/>
 <pinref part="C6" gate="G$1" pin="-"/>
-<wire x1="60.96" y1="-12.7" x2="60.96" y2="0" width="0.1524" layer="91"/>
 <junction x="60.96" y="-12.7"/>
 <pinref part="C5" gate="G$1" pin="-"/>
+<wire x1="66.04" y1="0" x2="60.96" y2="0" width="0.1524" layer="91"/>
 <wire x1="60.96" y1="0" x2="55.88" y2="0" width="0.1524" layer="91"/>
+<wire x1="60.96" y1="0" x2="60.96" y2="-12.7" width="0.1524" layer="91"/>
 <junction x="60.96" y="0"/>
 </segment>
 </net>
 <net name="+18V" class="0">
 <segment>
-<pinref part="PAD1" gate="G$1" pin="P"/>
+<pinref part="SWITCH_PIN2" gate="G$1" pin="P"/>
 <pinref part="P+17" gate="1" pin="+18V"/>
 <wire x1="43.18" y1="17.78" x2="60.96" y2="17.78" width="0.1524" layer="91"/>
 <wire x1="60.96" y1="17.78" x2="60.96" y2="27.94" width="0.1524" layer="91"/>
 <pinref part="C5" gate="G$1" pin="+"/>
 <pinref part="C6" gate="G$1" pin="+"/>
 <wire x1="55.88" y1="7.62" x2="60.96" y2="7.62" width="0.1524" layer="91"/>
-<wire x1="60.96" y1="7.62" x2="60.96" y2="17.78" width="0.1524" layer="91"/>
-<junction x="60.96" y="7.62"/>
+<wire x1="60.96" y1="7.62" x2="66.04" y2="7.62" width="0.1524" layer="91"/>
 <junction x="60.96" y="17.78"/>
+<wire x1="60.96" y1="17.78" x2="60.96" y2="7.62" width="0.1524" layer="91"/>
+<junction x="60.96" y="7.62"/>
 </segment>
 </net>
 <net name="VCC" class="0">
 <segment>
 <pinref part="P+3" gate="VCC" pin="VCC"/>
-<wire x1="12.7" y1="20.32" x2="12.7" y2="7.62" width="0.1524" layer="91"/>
-<pinref part="PAD2" gate="G$1" pin="P"/>
-<wire x1="12.7" y1="7.62" x2="38.1" y2="7.62" width="0.1524" layer="91"/>
-<wire x1="12.7" y1="-2.54" x2="12.7" y2="7.62" width="0.1524" layer="91"/>
-<junction x="12.7" y="7.62"/>
-<pinref part="PAD4" gate="G$1" pin="P"/>
-<wire x1="38.1" y1="-2.54" x2="12.7" y2="-2.54" width="0.1524" layer="91"/>
+<wire x1="5.08" y1="27.94" x2="5.08" y2="17.78" width="0.1524" layer="91"/>
+<pinref part="BATTERY+" gate="G$1" pin="P"/>
+<wire x1="5.08" y1="-12.7" x2="5.08" y2="17.78" width="0.1524" layer="91"/>
+<junction x="5.08" y="17.78"/>
+<pinref part="SWITCH_PIN1" gate="G$1" pin="P"/>
+<wire x1="27.94" y1="17.78" x2="5.08" y2="17.78" width="0.1524" layer="91"/>
+<wire x1="27.94" y1="-12.7" x2="5.08" y2="-12.7" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>

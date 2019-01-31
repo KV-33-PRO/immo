@@ -2303,10 +2303,10 @@ design rules under a new name.</description>
 <attribute name="OC_FARNELL" value="unknown" x="62.32" y="93.47" size="1.778" layer="27" display="off"/>
 <attribute name="OC_NEWARK" value="unknown" x="62.32" y="93.47" size="1.778" layer="27" display="off"/>
 </element>
-<element name="PAD1" library="wirepad" package="4,16O1,6" value="WIREPAD4,16O1,6" x="151.03" y="13.48"/>
-<element name="PAD2" library="wirepad" package="4,16O1,6" value="WIREPAD4,16O1,6" x="150.84" y="27.49"/>
-<element name="PAD3" library="wirepad" package="4,16O1,6" value="WIREPAD4,16O1,6" x="150.88" y="34"/>
-<element name="PAD4" library="wirepad" package="4,16O1,6" value="WIREPAD4,16O1,6" x="150.91" y="19.96"/>
+<element name="SWITCH_PIN2" library="wirepad" package="4,16O1,6" value="WIREPAD4,16O1,6" x="151.03" y="13.48"/>
+<element name="BATTERY+" library="wirepad" package="4,16O1,6" value="WIREPAD4,16O1,6" x="150.84" y="27.49"/>
+<element name="BATTERY-" library="wirepad" package="4,16O1,6" value="WIREPAD4,16O1,6" x="150.88" y="34"/>
+<element name="SWITCH_PIN1" library="wirepad" package="4,16O1,6" value="WIREPAD4,16O1,6" x="150.91" y="19.96"/>
 <element name="C1" library="resistor" package="E5-8,5" value="" x="137.94" y="0.49"/>
 <element name="C2" library="resistor" package="E2,5-5" value="" x="137.91" y="0.43"/>
 <element name="C3" library="resistor" package="E2,5-5" value="" x="135.27" y="88.16" rot="R90"/>
@@ -2483,7 +2483,7 @@ design rules under a new name.</description>
 <wire x1="61.49" y1="41.16" x2="60.43" y2="40.1" width="1.778" layer="16"/>
 <wire x1="60.43" y1="40.1" x2="57.7" y2="40.1" width="1.778" layer="16"/>
 <wire x1="57.69" y1="40.09" x2="57.7" y2="40.1" width="1.778" layer="16"/>
-<contactref element="PAD3" pad="1"/>
+<contactref element="BATTERY-" pad="1"/>
 <wire x1="134.63" y1="51.22" x2="137.17" y2="51.22" width="1.6764" layer="16"/>
 <wire x1="130.72" y1="28.35" x2="137.12" y2="28.35" width="1.778" layer="16"/>
 <wire x1="137.12" y1="28.35" x2="137.16" y2="28.31" width="1.778" layer="16"/>
@@ -2741,7 +2741,7 @@ design rules under a new name.</description>
 <wire x1="57.8" y1="37.44" x2="57.69" y2="37.55" width="1.778" layer="16"/>
 <wire x1="57.67" y1="57.53" x2="67.22" y2="57.53" width="1.778" layer="16"/>
 <wire x1="67.22" y1="57.53" x2="67.71" y2="57.04" width="1.778" layer="16"/>
-<contactref element="PAD1" pad="1"/>
+<contactref element="SWITCH_PIN2" pad="1"/>
 <contactref element="C5" pad="+"/>
 <contactref element="C6" pad="+"/>
 <wire x1="149.46" y1="5.89" x2="150.67" y2="5.89" width="1.778" layer="16"/>
@@ -2909,9 +2909,9 @@ design rules under a new name.</description>
 <wire x1="135.4" y1="0.68" x2="142.73" y2="8.01" width="1.778" layer="16"/>
 </signal>
 <signal name="VCC">
-<contactref element="PAD2" pad="1"/>
+<contactref element="BATTERY+" pad="1"/>
 <wire x1="150.84" y1="27.49" x2="150.84" y2="20.03" width="3.81" layer="16"/>
-<contactref element="PAD4" pad="1"/>
+<contactref element="SWITCH_PIN1" pad="1"/>
 <wire x1="150.91" y1="19.96" x2="150.84" y2="20.03" width="0" layer="19" extent="16-16"/>
 </signal>
 <signal name="P$11">
