@@ -62,11 +62,27 @@ int main(int argc, char** argv){
   ros::NodeHandle n;
   ros::Subscriber sub = n.subscribe("joint_states", 10, jointStatesCallback);
   ros::Publisher pub = n.advertise<nav_msgs::Odometry>("odom", 50);
+  tf::TransformBroadcaster odom_broadcaster;
 
   ros::Rate r(50);
   while(ros::ok()){
     ros::spinOnce();
+
     geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(th);
+
+    geometry_msgs::TransformStamped odom_trans;
+    odom_trans.header.stamp = current_time;
+    odom_trans.header.frame_id = "odom";
+    odom_trans.child_frame_id = "base_link";
+
+    odom_trans.transform.translation.x = x;
+    odom_trans.transform.translation.y = y;
+    odom_trans.transform.translation.z = 0.0;
+    odom_trans.transform.rotation = odom_quat;
+
+    odom_broadcaster.sendTransform(odom_trans);
+
+
     nav_msgs::Odometry odom;
 
     odom.header.stamp = ros::Time::now();
