@@ -3702,8 +3702,8 @@ W = angled&lt;p&gt;
 </classes>
 <parts>
 <part name="OK1" library="optocoupler" deviceset="SFH9*" device="310"/>
-<part name="R1" library="resistor-power" deviceset="R" device="RS1/4"/>
-<part name="R2" library="resistor-power" deviceset="R" device="RS1/4"/>
+<part name="R1" library="resistor-power" deviceset="R" device="RS1/4" value="100 Om"/>
+<part name="R2" library="resistor-power" deviceset="R" device="RS1/4" value="3.3 kOm"/>
 <part name="P+1" library="supply1" deviceset="+5V" device=""/>
 <part name="GND1" library="supply1" deviceset="GND" device=""/>
 <part name="SV1" library="con-lstb" deviceset="MA03-1" device=""/>
