@@ -7,5 +7,6 @@
         <Directory>hardware</Directory>
         <Directory>launch</Directory>
         <Directory>design</Directory>
+        <Directory>documentation</Directory>
     </WatchDirectories>
 </Workspace>
