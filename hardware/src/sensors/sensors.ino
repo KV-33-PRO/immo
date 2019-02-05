@@ -43,24 +43,14 @@ void loop()
   if ((millis() - last_ms) > RATE_MS) {
     last_ms = millis();
 
-    snr_l_msg.range = getSNRRange(0);
+    snr_l_msg.range = kf_l.updateEstimate(sonar_l.read()/100.0);
     snr_l_msg.header.stamp = nh.now();
     snr_l_pub.publish(&snr_l_msg);
 
-    snr_r_msg.range = getSNRRange(1);
+    snr_r_msg.range = kf_r.updateEstimate(sonar_r.read()/100.0);
     snr_r_msg.header.stamp = nh.now();
     snr_r_pub.publish(&snr_r_msg);
 
   }
   nh.spinOnce();
-}
-
-float getSNRRange(int side) {
-  if (side == 0) {
-    return kf_l.updateEstimate(sonar_l.read()/100.0);
-  }
-  else
-  {
-    return kf_r.updateEstimate(sonar_r.read()/100.0);
-  }
 }
