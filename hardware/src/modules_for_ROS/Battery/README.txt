@@ -1,7 +1,6 @@
 **********************************   README FILE   ***************************************
 
 Contact: Kvantorium33
-  Autor:  Rossolov Roman
 
 Version: Battery library for ROS 01/01/2019
 
