@@ -1,0 +1,43 @@
+Использование STM32F103C8T6 в Arduino IDE
+
+В настройках Arduino IDE нужно добавить поддержку SMT32F103 (File / Preferences / Additional Boards Manager URL):
+http://dan.drown.org/stm32duino/package_STM32duino_index.json
+
+В Boards Manager (Tools / Board / Boards Manager) установить "SMT32F1xx/GD32F1xx boards by smt32duino" и активировать загрузку прошивки через Serial (Tools / Upload method / Serial). На плате нужно переключить перемычку BOOT0 в High, а BOOT1 в Low. После этого нужно сбросить плату и можно заливать скетчи. Для нормальной работы прошивки BOOT0 и BOOT1 должны быть в состоянии Low.
+
+Но лично я рекомендую прошить STM32duino bootloader и пользоваться загрузкой скетча через USB. Для этого подключаем плату через USB-UART преобразователь, как описано выше. Затем в консоли выполняем команды
+
+$ wget -P /tmp https://github.com/rogerclarkmelbourne/STM32duino-bootloader/raw/master/binaries/generic_boot20_pc13.bin
+$ cd ~/.arduino15/packages/stm32duino/tools/stm32tools/2017.11.8/linux/stm32flash
+$ ./stm32flash -w /tmp/generic_boot20_pc13.bin -v -g 0x0 /dev/ttyUSB0
+
+Мне еще потребовалось подправить правила UDEV, чтобы ModemManager, libmtp и UDisks не трогали плату:
+
+$ cat /etc/udev/rules.d/45-usbprog.rules
+# STM32duino USB bootloader
+ATTRS{idProduct}=="1001", ATTRS{idVendor}=="0110", MODE="0660", GROUP="plugdev", ENV{ID_MM_DEVICE_IGNORE}="1", ENV{UDISKS_PRESENTATION_HIDE}="1", ENV{UDISKS_IGNORE}="1"
+ATTRS{idProduct}=="1002", ATTRS{idVendor}=="0110", MODE="0660", GROUP="plugdev", ENV{ID_MM_DEVICE_IGNORE}="1", ENV{UDISKS_PRESENTATION_HIDE}="1", ENV{UDISKS_IGNORE}="1"
+ATTRS{idProduct}=="0003", ATTRS{idVendor}=="1eaf", MODE="0660", GROUP="plugdev" SYMLINK+="maple", ENV{ID_MM_DEVICE_IGNORE}="1", ENV{UDISKS_PRESENTATION_HIDE}="1", ENV{UDISKS_IGNORE}="1"
+ATTRS{idProduct}=="0004", ATTRS{idVendor}=="1eaf", MODE="0660", GROUP="plugdev" SYMLINK+="maple", ENV{ID_MM_DEVICE_IGNORE}="1", ENV{UDISKS_PRESENTATION_HIDE}="1", ENV{UDISKS_IGNORE}="1"
+
+В начале файла /lib/udev/rules.d/69-libmtp.rules добавить
+
+# STM32duino USB bootloader
+ATTR{idVendor}=="1eaf", GOTO="libmtp_rules_end"
+ATTR{idVendor}=="0110", GOTO="libmtp_rules_end"
+
+После этого выполнить
+
+$ sudo udevadm control --reload-rules
+
+Мне пришлось перезагрузить компьютер - в моем случае UDisks не отставал от платы без перезагрузки. После этого отключить USB-UART преобразователь, выставить перемычки BOOT0 и BOOT1 в Low и подключить плату к компьютеру через USB. Теперь выбираем в Arduino IDE тип загрузки "STM32duino bootloader" (Tools / Upload method / STM32duino bootloader).
+
+Первую загрузку скетча нужно делать включив режим infinite в загрузчике. Для этого подключается резистор номиналом 10k между 3,3v и PC14. После сброса светодиод на плате начинает постоянно мигать, что означает что загрузчик будет ждать начала загрузки без ограничения по времени. После первой загрузки этот режим можно выключить и дальше пользоваться платой как обычно.
+
+Последовательный порт платы опознается в Linux как /dev/ttyACM0 и его нужно выбрать в "Tools / Port" чтобы работал Serial Monitor.
+
+В Arduino IDE 1.6.8 у меня были ошибки при компиляции и я обновился до Arduino IDE 1.8.5. Для проверки работы платы можно использовать пример Blink (File / Examples / 01.Basics / Blink). 
+
+Если говорит мол не могу найти файл upload-reset:
+Необходимо заменить файл upload-reset на тот что лежит в папке
+/home/user/.arduino15/packages/stm32duino/tools/stm32tools/2019.2.4/linux/
