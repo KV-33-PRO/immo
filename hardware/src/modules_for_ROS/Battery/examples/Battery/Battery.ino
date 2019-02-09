@@ -1,6 +1,4 @@
 #include <ros.h>
-#include <sensor_msgs/BatteryState.h>
-#include <std_msgs/String.h>
 #include <Battery.h>
 
 #define RATE_MS                   20       // задержка для публикации в топик

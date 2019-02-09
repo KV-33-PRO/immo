@@ -1,0 +1,4 @@
+<launch>
+   <node pkg="led_control" type="led_control_node" name="led_control_node" output="screen">
+   </node>
+</launch>
