@@ -42,7 +42,7 @@ private:
     ros::Publisher turn_pub;
     ros::Publisher brake_pub;
     ros::Publisher flasher_pub;
-    ros::Publisher position_lamps_pub;
+    ros::Publisher position_pub;
     ros::NodeHandle nh;
 
     std_msgs::UInt8 head;
@@ -50,7 +50,7 @@ private:
     std_msgs::UInt8 turn;
     std_msgs::UInt8 brake;
     std_msgs::UInt8 flasher;
-    std_msgs::UInt8 position_lamps;
+    std_msgs::UInt8 position;
 
     ros::Time parking_time;
     bool parking;
@@ -135,7 +135,7 @@ private:
         //При движении фары включены, в режиме парковки головной свет отключен
         if(parking!=true)
         {
-            if(position_lamps.data==POSITION_LAMPS_ON)
+            if(position.data==POSITION_LAMPS_ON)
             {
                 //Включаем ближний свет
                 if(head_mode == HEAD_DIPPED_BEAM)
@@ -152,9 +152,9 @@ private:
         return mode;
     }
 
-    uint8_t positionLampsMode(uint8_t position_lamps_mode)
+    uint8_t positionMode(uint8_t position_mode)
     {
-        if(position_lamps_mode==POSITION_LAMPS_ON)
+        if(position_mode==POSITION_LAMPS_ON)
         {
             //Включаем габариты
             return POSITION_LAMPS_ON;
@@ -189,7 +189,7 @@ public:
         turn_pub = nh.advertise<std_msgs::UInt8>("light_control/turn", 10);
         brake_pub = nh.advertise<std_msgs::UInt8>("light_control/brake", 10);
         flasher_pub = nh.advertise<std_msgs::UInt8>("light_control/flasher", 10);
-        position_lamps_pub = nh.advertise<std_msgs::UInt8>("light_control/position_lamps", 10);
+        position_pub = nh.advertise<std_msgs::UInt8>("light_control/position", 10);
         parking = false;
         not_moving=false;
     }
@@ -199,7 +199,7 @@ public:
         ros::Rate r(10);
 
         //Режим работы габаритных огней
-        position_lamps.data = positionLampsMode(POSITION_LAMPS_ON);
+        position.data = positionMode(POSITION_LAMPS_ON);
 
         //Режим работы головного света
         head.data = headMode(HEAD_HIGH_BEAM);
@@ -222,7 +222,7 @@ public:
         turn_pub.publish(turn);
         brake_pub.publish(brake);
         flasher_pub.publish(flasher);
-        position_lamps_pub.publish(position_lamps);
+        position_pub.publish(position);
 
         //ROS_INFO("head: %i, back: %i, turn: %i, brake: %i, flasher: %i, position_lamps: %i", head.data, back.data, turn.data, brake.data, flasher.data, position_lamps.data);
 
