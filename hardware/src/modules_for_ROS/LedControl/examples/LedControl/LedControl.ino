@@ -16,7 +16,6 @@ void setup() {
 void loop() {
   if (millis() - last_ms >= RATE_MS) {     //публикуем не чаще чем RATE_MS
     last_ms = millis();                    //фиксируем последнее время публикации сообщения в топик
-    led.disco();
   }
   nh.spinOnce();
 }
