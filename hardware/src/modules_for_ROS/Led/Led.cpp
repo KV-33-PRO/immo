@@ -49,21 +49,47 @@ void Led::init() {
 
 }
 
-void Led::head(uint8_t mode){
+void Led::headOff(){
 
 }
 
-void Led::turn(uint8_t mode){
+void Led::headDippedBeam(){
 
 }
 
-void Led::back(uint8_t mode){
+void Led::headHighBeam(){
 
 }
 
-void Led::brake(uint8_t mode){
-    if(mode == BRAKE_ON)
-    {
+void Led::turnOff(){
+
+}
+
+void Led::turnLeft(){
+
+}
+
+void Led::turnRight(){
+
+}
+
+void Led::turnFlash(){
+
+}
+
+void Led::backOff(){
+
+}
+
+void Led::backOn(){
+
+}
+
+void Led::brakeOff(){
+    stripShowColor(2, 2, 3, 0, 0, black);
+}
+
+void Led::brakeOn(){
     int wait = 80;
     for (int b = 0; b <= 2; b++) {
       stripShowColor(2, 2, 3, 0, 0, red);
@@ -72,16 +98,13 @@ void Led::brake(uint8_t mode){
       delay(wait);
     }
     stripShowColor(2, 2, 3, 0, 0, red);
-    }
-    else
-    {
-        stripShowColor(2, 2, 3, 0, 0, black);
-    }
 }
 
-void Led::flaser(uint8_t mode){
-    if(mode == FLASHER_ON)
-    {
+void Led::flaserOff(){
+    stripShowColor(4, 0, 1, 2, 3, black);
+}
+
+void Led::flaserOn(){
     int wait = 50;
     for (int b = 0; b <= 5; b++) {
       for (int b = 0; b <= 3; b++) {
@@ -98,13 +121,12 @@ void Led::flaser(uint8_t mode){
       }
     }
     stripShowColor(4, 0, 1, 2, 3, black);
-    }
-    else
-    {
-        stripShowColor(4, 0, 1, 2, 3, black);
-    }
 }
 
-void Led::position(uint8_t mode){
+void Led::positionOff(){
+
+}
+
+void Led::positionOn(){
 
 }
