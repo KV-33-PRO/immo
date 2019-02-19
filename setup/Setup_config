@@ -1,0 +1,19 @@
+Настройка сети.
+
+Выполните подключение по SSH к роботу:
+ssh turtle@<IP_OF_ROBOT>
+
+Необходимо заменить <IP_OF_ROBOT> именем хоста или IP-адресом робота.
+
+На роботе необходимо выполнить следующие команды:
+
+echo export ROS_MASTER_URI=http://localhost:11311 >> ~/.bashrc
+echo export ROS_HOSTNAME=IP_OF_ROBOT >> ~/.bashrc
+
+На ПК необходимо выполнить следующие команды:
+
+echo export ROS_MASTER_URI=http://IP_OF_ROBOT:11311 >> ~/.bashrc
+echo export ROS_HOSTNAME=IP_OF_PC >> ~/.bashrc
+
+
+

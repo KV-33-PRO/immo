@@ -8,5 +8,6 @@
         <Directory>launch</Directory>
         <Directory>design</Directory>
         <Directory>documentation</Directory>
+        <Directory>setup</Directory>
     </WatchDirectories>
 </Workspace>
