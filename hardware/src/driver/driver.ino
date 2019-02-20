@@ -7,6 +7,7 @@
 #include <Battery.h>
 
 #define RATE_MS                   20       // задержка для публикации в топик
+#define TIME_TO_LIVE_MS           1000     // задержка для остановки движения при отсутствии сообщений в топике cmd_vel
 
 #define Kp                        167.0    // пропорциональный коэффициент для ПИД регулятора (41.7)
 #define Ki                        0.0      // интегральный коэффициент для ПИД регулятора
@@ -44,6 +45,7 @@ float state_pos[NUM_JOINTS] = {0, 0, 0};
 float state_vel[NUM_JOINTS] = {0, 0, 0};
 float state_eff[NUM_JOINTS] = {0, 0, 0};
 unsigned long last_ms;
+unsigned long last_msgs_cmd_vel_ms;
 
 uint8_t battery_pins[4] = {
     BAT_BALANCE_PIN_1,
@@ -57,28 +59,17 @@ Battery battery("/battery", battery_pins, sizeof(battery_pins) / sizeof(uint8_t)
 ros::NodeHandle nh;
 
 float linear = 0;           //значение для драйвера моторов
+float angular = 0;          //значение для руля моторов
+
 float e_prev = 0;           //последнее значение разницы скорости движения
 float I_prev = 0;           //последнее значение интегральной составляющей ПИД регулятора
 float speed_actual = 0;     //текущая усредненая скорость (между публикациями)
 
 //Обработка сообщений из топика "cmd_vel"
 void drive_cb(const geometry_msgs::Twist& cmd_vel) {
-  Dynamixel.move(DYNAMIXEL_ID, angular2dynamixel(cmd_vel.angular.z));      //выполняем поворот динамикселя на нужный угол
-  
-  linear = linear2driverMotor(-cmd_vel.linear.x);                           //выполняем расчет значения для драйвера двигателей
-  
-  if (linear > 1) {
-    analogWrite(MOTOR_PIN_1, linear);        //запускаем моторы направление движения - вперед
-    analogWrite(MOTOR_PIN_2, 0);
-  }
-  else if (linear < -1) {
-    analogWrite(MOTOR_PIN_2, -linear);       //запускаем моторы направление движения - назад
-    analogWrite(MOTOR_PIN_1, 0);
-  }
-  else if (linear == 0) {
-    analogWrite(MOTOR_PIN_2, 0);             //отключаем моторы
-    analogWrite(MOTOR_PIN_1, 0);
-  }
+  angular = angular2dynamixel(cmd_vel.angular.z);    //выполняем расчет значения для сервомотора
+  linear = linear2driverMotor(-cmd_vel.linear.x);    //выполняем расчет значения для драйвера двигателей
+  last_msgs_cmd_vel_ms = millis();                   //фиксируем время последнего управляющего воздействия
 }
 
 sensor_msgs::JointState state_msg;
@@ -104,7 +95,8 @@ void setup() {
     Dynamixel.ledStatus(DYNAMIXEL_ID, OFF);
     delay(100);
   }
-  Dynamixel.move(DYNAMIXEL_ID, DUNAMIXEL_CENTER);       //установить dynamixel в центральное положение
+  angular = DUNAMIXEL_CENTER;
+  Dynamixel.move(DYNAMIXEL_ID, angular);       //установить dynamixel в центральное положение
 
   nh.getHardware()->setBaud(500000);
   nh.initNode();
@@ -123,10 +115,22 @@ void setup() {
 }
 
 void loop() {
-
-  unsigned long t = millis() - last_ms;
+   unsigned long t = millis() - last_ms;
   if (t >= RATE_MS) {     //публикуем не чаще чем RATE_MS
     last_ms = millis();   //фиксируем последнее время публикации сообщения в топик
+
+    //Управление движением
+    if(millis() - last_msgs_cmd_vel_ms <= TIME_TO_LIVE_MS)
+    {
+        Dynamixel.move(DYNAMIXEL_ID, angular);     //выполняем поворот динамикселя на нужный угол
+        driverMotor(linear);                       //выполняем движение моторов
+    }
+    else
+    {
+        driverMotor(0); //стоп моторы
+    }
+
+    //Фиксация данных для рассчета одометрии
     state_vel[0] = state_pos[0] / (t / 1000.0); //преобразуем в рад/с
     state_vel[1] = state_pos[1] / (t / 1000.0);
     state_pos[2] = dynamixel2angular(Dynamixel.readPosition(DYNAMIXEL_ID)); //Получаем значение положения руля
@@ -222,6 +226,22 @@ int linear2driverMotor(float linear_speed)
   }
   
   return motor_value;
+}
+
+//Обработчик управления моторами
+void driverMotor(float linear){
+    if (linear > 1) {
+      analogWrite(MOTOR_PIN_1, linear);        //запускаем моторы направление движения - вперед
+      analogWrite(MOTOR_PIN_2, 0);
+    }
+    else if (linear < -1) {
+      analogWrite(MOTOR_PIN_2, -linear);       //запускаем моторы направление движения - назад
+      analogWrite(MOTOR_PIN_1, 0);
+    }
+    else if (linear == 0) {
+      analogWrite(MOTOR_PIN_2, 0);             //отключаем моторы
+      analogWrite(MOTOR_PIN_1, 0);
+    }
 }
 
 // Обработчики прерываний для левого и правого энкодеров
