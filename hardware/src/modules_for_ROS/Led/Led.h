@@ -39,39 +39,26 @@
 class Led {
 public:
     Led();
-    void init();
-
-    void headOff();
-    void headDippedBeam();
-    void headHighBeam();
-
-    void turnOff();
-    void turnLeft();
-    void turnRight();
-    void turnFlash();
-
-    void backOff();
-    void backOn();
-
-    void brakeOff();
-    void brakeOn();
-
-    void flaserOff();
-    void flaserOn();
-
-    void positionOff();
-    void positionOn();
-
+    void head(uint8_t mode);
+    void turn(uint8_t mode);
+    void back(uint8_t mode);
+    void brake(uint8_t mode);
+    void flaser(uint8_t mode);
+    void position(uint8_t mode);
 private:
     void stripShowColor(int count_lamps, int lamp1, int lamp2, int lamp3, int lamp4, uint32_t color);
-
+    void Led::setColorLeds(int side, int id_led, uint32_t color);
     int *_leds;
     WS2812B _strip;
     uint32_t _yelloy;
-    uint32_t _red;
     uint32_t _blue;
-    uint32_t _white;
     uint32_t _black;
+    uint32_t _red_high;
+    uint32_t _red_low;
+    uint32_t _white_high;
+    uint32_t _white_middle;
+    uint32_t _white_low;
+    unsigned long time_break_last;
 };
 
 #endif

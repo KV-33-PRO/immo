@@ -1,0 +1,85 @@
+Выполняем команды:
+cd /lib/systemd/system
+sudo nano roscore.env
+
+Содержимое файла roscore.env:                         
+ROS_ROOT=/opt/ros/kinetic/share/ros
+ROS_DISTRO=kinetic
+ROS_PACKAGE_PATH=/home/firefly/immo/src:/opt/ros/kinetic/share
+ROS_PORT=11311
+ROS_MASTER_URI=http://localhost:11311
+CMAKE_PREFIX_PATH=/home/firefly/immo/devel:/opt/ros/kinetic
+PATH=/opt/ros/kinetic/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+LD_LIBRARY_PATH=/opt/ros/kinetic/lib
+PYTHONPATH=/home/firefly/immo/devel/lib/python2.7/dist-packages:/opt/ros/kinetic/lib/python2.7/dist-packages
+ROS_IP=192.168.33.234
+__________________________________________________________________________________
+
+Выполняем команды:
+cd /lib/systemd/system
+sudo nano roscore.service
+
+Содержимое файла roscore.service:
+[Unit]
+Description=Launcher for the ROS master, parameter server and rosout logging no$
+After=network.target
+
+[Service]
+EnvironmentFile=/lib/systemd/system/roscore.env
+ExecStart=/opt/ros/kinetic/bin/roscore
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
+___________________________________________________________________________________
+
+Выполняем команды:
+cd /lib/systemd/system
+sudo nano immo.service
+
+Содержимое файла immo.service:
+[Unit]
+Description=immo ROS package
+Requires=roscore.service
+After=roscore.service
+
+[Service]
+EnvironmentFile=/lib/systemd/system/roscore.env
+ExecStart=/opt/ros/kinetic/bin/roslaunch /home/firefly/immo/launch/immo.launch --wait
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
+___________________________________________________________________________________
+
+Для запуска выполняем:
+sudo systemctl daemon-reload
+
+Для включения сервича в загрузку выполняем:
+sudo systemctl enable immo.service
+sudo systemctl enable roscore.service
+___________________________________________________________________________________
+
+Для отключения сервича в загрузку выполняем:
+sudo systemctl disable immo.service
+sudo systemctl disable roscore.service
+
+___________________________________________________________________________________
+
+Вывод списка служб и их статусов:
+systemctl list-units --type service -all
+
+Вывод служб которые завершились с ошибкой:
+systemctl list-units --type service --state failed
+
+Чтобы запустить службу используется команда start, например:
+sudo systemctl start immo.service
+
+Причем расширение service можно опустить, оно и так подставляется по умолчанию. Если запуск прошел хорошо, программа ничего не выведет.
+
+Остановить службу linux можно командой:
+sudo systemctl stop immo.service
+
+Посмотреть состояние службы позволяет команда status:
+sudo systemctl status immo.service
+
