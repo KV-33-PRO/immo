@@ -2,7 +2,7 @@
 #define LedControl_h
 #include <ros.h>
 #include <std_msgs/UInt8.h>
-#include <Led.h>
+#include <LedWS2812BforSTM32.h>
 
 #define COUNT_TOPICS              6
 #define COUNT_INDICATION_STATUS   8
@@ -25,7 +25,6 @@ private:
     ros::NodeHandle *_nh;
     std_msgs::UInt8 _indication[COUNT_TOPICS][2];
     bool _indication_status[COUNT_INDICATION_STATUS];
-    Led _led;
 public:
     LedControl();
     void init(ros::NodeHandle &nh);

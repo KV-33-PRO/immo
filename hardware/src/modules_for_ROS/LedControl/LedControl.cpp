@@ -198,7 +198,6 @@ LedControl::LedControl() :
 }
 
 void LedControl::init(ros::NodeHandle &nh) {
-    _led.init();
     _nh = &nh;
     _nh->subscribe(_head_sub);
     _nh->subscribe(_turn_sub);
@@ -209,5 +208,5 @@ void LedControl::init(ros::NodeHandle &nh) {
 }
 
 void LedControl::indication(){
-    _led.indication(_indication_status);
+    Led.indication(_indication_status);
 }
