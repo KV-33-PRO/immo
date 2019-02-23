@@ -50,10 +50,10 @@
 #define POSITION_LAMPS     0
 #define DIPPED_BEAM_LAMPS  1
 #define HIGH_BEAM_LAMPS    2
-#define TURN_LEFT_LAMPS    3
-#define TURN_RIGHT_LAMPS   4
-#define BRAKE_LAMPS        5
-#define BACK_LAMPS         6
+#define BRAKE_LAMPS        3
+#define BACK_LAMPS         4
+#define TURN_LEFT_LAMPS    5
+#define TURN_RIGHT_LAMPS   6
 #define FLASHER_LAMPS      7
 
 // Private Methods //////////////////////////////////////////////////////////////
@@ -93,23 +93,23 @@ void LedWS2812BforSTM32::setSideColorLeds(int side, int led_start, int led_end, 
 void LedWS2812BforSTM32::position(){
     if(_indication_status[POSITION_LAMPS])
     {
-        setSideColorLeds(FRONT, 0, 4, _white_low);
-        setSideColorLeds(REAR, 0, 4, _red_low);
+        setSideColorLeds(FRONT, 0, COUNT_LEDS_HEADLIGHT-1, _white_low);
+        setSideColorLeds(REAR, 0, COUNT_LEDS_HEADLIGHT-1, _red_low);
     }
     else
     {
-        setSideColorLeds(ALL, 0, 4, _black);
+        setSideColorLeds(ALL, 0, COUNT_LEDS_HEADLIGHT-1, _black);
     }
 }
 
 void LedWS2812BforSTM32::head(){
     if(_indication_status[DIPPED_BEAM_LAMPS])
     {
-        setSideColorLeds(FRONT, 0, 4, _white_middle);
+        setSideColorLeds(FRONT, 0, COUNT_LEDS_HEADLIGHT-1, _white_middle);
     }
     if(_indication_status[HIGH_BEAM_LAMPS])
     {
-        setSideColorLeds(FRONT, 0, 4, _white_high);
+        setSideColorLeds(FRONT, 0, COUNT_LEDS_HEADLIGHT-1, _white_high);
     }
 }
 
@@ -117,17 +117,17 @@ void LedWS2812BforSTM32::backAndBrake(){
     if(_indication_status[BACK_LAMPS] && _indication_status[BRAKE_LAMPS])
     {
         setSideColorLeds(REAR, 0, 1, _white_high);
-        setSideColorLeds(REAR, 2, 4, _red_high);   //Просто включается (не моргает)
+        setSideColorLeds(REAR, 2, COUNT_LEDS_HEADLIGHT-1, _red_high);   //Просто включается (не моргает)
     }
     else
     {
         if(_indication_status[BACK_LAMPS])
         {
-        setSideColorLeds(REAR, 0, 4, _white_high);
+        setSideColorLeds(REAR, 0, COUNT_LEDS_HEADLIGHT-1, _white_high);
         }
-        if(_indication_status[BACK_LAMPS])
+        if(_indication_status[BRAKE_LAMPS])
         {
-        setSideColorLeds(REAR, 0, 4, _red_high);  //Просто включается (не моргает)
+        setSideColorLeds(REAR, 0, COUNT_LEDS_HEADLIGHT-1, _red_high);  //Просто включается (не моргает)
         }
     }
 }
@@ -135,17 +135,17 @@ void LedWS2812BforSTM32::backAndBrake(){
 void LedWS2812BforSTM32::turn(){
     if(_turn_status==TURN_OFF)
     {
-        if(_indication_status[TURN_LEFT] && _indication_status[TURN_RIGHT])
+        if(_indication_status[TURN_LEFT_LAMPS] && _indication_status[TURN_RIGHT_LAMPS])
         {
             _turn_status=TURN_FLASH;
         }
         else
         {
-            if(_indication_status[TURN_LEFT])
+            if(_indication_status[TURN_LEFT_LAMPS])
             {
                 _turn_status=TURN_LEFT;
             }
-            if(_indication_status[TURN_RIGHT])
+            if(_indication_status[TURN_RIGHT_LAMPS])
             {
                 _turn_status=TURN_RIGHT;
             }
@@ -158,38 +158,43 @@ void LedWS2812BforSTM32::turn(int mode){
     int side = 5;
     if(millis() - _time_turn_last >= RATE_TURN_MS)
     {
-        if(_turn_count<5)
-        {
-            switch (mode) {
-            case TURN_FLASH:
-                side=ALL;
-                break;
-            case TURN_LEFT:
-                side=LEFT;
-                break;
-            case TURN_RIGHT:
-                side=RIGHT;
-                break;
-            default:
-                break;
-            }
+        _turn_count++;
+        _time_turn_last = millis();
+    }
 
-            if(mode != TURN_OFF)
-            {
+    if(_turn_count<COUNT_LEDS_HEADLIGHT)
+    {
+        switch (mode) {
+        case TURN_FLASH:
+            side=ALL;
+            break;
+        case TURN_LEFT:
+            side=LEFT;
+            break;
+        case TURN_RIGHT:
+            side=RIGHT;
+            break;
+        default:
+            break;
+        }
+
+        if(mode != TURN_OFF)
+        {
             setSideColorLeds(side, 0, _turn_count, _yelloy);
             if(_turn_count<4)
-            setSideColorLeds(side, _turn_count, 4, _black);
-            }
-
-            _turn_count++;
-            _time_turn_last = millis();
+                setSideColorLeds(side, _turn_count, COUNT_LEDS_HEADLIGHT-1, _black);
         }
         else
         {
-            _turn_count=0;
-            _turn_status=TURN_OFF;
-            setSideColorLeds(side, 0, 4, _black);
+            if(_turn_count==5)
+                setSideColorLeds(side, 0, COUNT_LEDS_HEADLIGHT-1, _black);
         }
+    }
+    else
+    {
+        _turn_count=0;
+        _turn_status=TURN_OFF;
+        setSideColorLeds(side, 0, COUNT_LEDS_HEADLIGHT-1, _black);
     }
 }
 
@@ -222,7 +227,7 @@ void LedWS2812BforSTM32::flaser(){
 }
 
 void LedWS2812BforSTM32::show(){
-    for(int lamps = 0; lamps<4; lamps++)
+    for(int lamps = 0; lamps<NUM_LEDS/COUNT_LEDS_HEADLIGHT; lamps++)
     {
         for(int led = 0; led<COUNT_LEDS_HEADLIGHT; led++){
             _strip.setPixelColor(_leds[lamps][led], _leds_color[lamps][led]);
@@ -234,16 +239,7 @@ void LedWS2812BforSTM32::show(){
 // Public Methods //////////////////////////////////////////////////////////////
 
 LedWS2812BforSTM32::LedWS2812BforSTM32()
-    : _leds({{4, 3, 2, 1, 0},         //0 - левая передная
-             {5, 6, 7, 8, 9},         //1 - правая передняя
-             {14 ,13 ,12, 11, 10},    //2 - левая задняя
-             {15, 16, 17, 18, 19}}),  //3 - правая задняя
-      _strip(WS2812B(NUM_LEDS))
 {
-    _strip.begin();     // Sets up the SPI
-    _strip.show();      // Clears the strip, as by default the strip data is set to all LED's off.
-    //strip.setBrightness(8);
-
     _yelloy = _strip.Color(255, 128, 0);
     _blue = _strip.Color(0, 0, 255);
     _red_high = _strip.Color(255, 0, 0);
@@ -259,7 +255,7 @@ LedWS2812BforSTM32::LedWS2812BforSTM32()
     for(int status = 0; status<COUNT_INDICATION_STATUS; status++){
         _indication_status[status] = false;
     }
-    setSideColorLeds(ALL, 0, 4, _black);
+    setSideColorLeds(ALL, 0, COUNT_LEDS_HEADLIGHT-1, _black);
 }
 
 void LedWS2812BforSTM32::indication(bool *indication_status)
@@ -277,6 +273,56 @@ void LedWS2812BforSTM32::indication(bool *indication_status)
 
     //Вывод на ленту
     show();
+}
+
+String LedWS2812BforSTM32::getData()
+{
+    String str = "";
+    int count = 0;
+    while(count<NUM_LEDS)
+    {
+        for(int lamps = 0; lamps<NUM_LEDS/COUNT_LEDS_HEADLIGHT; lamps++)
+        {
+            for(int led = 0; led<COUNT_LEDS_HEADLIGHT; led++){
+                if(count==_leds[lamps][led]){
+                    if(_leds_color[lamps][led]==_white_low)
+                        str += "б";
+                    if(_leds_color[lamps][led]==_red_low)
+                        str += "к";
+                    if(_leds_color[lamps][led]==_white_middle)
+                        str += "W";
+                    if(_leds_color[lamps][led]==_white_high)
+                        str += "Б";
+                    if(_leds_color[lamps][led]==_red_high)
+                        str += "К";
+                    if(_leds_color[lamps][led]==_black)
+                        str += "Ч";
+                    if(_leds_color[lamps][led]==_yelloy)
+                        str += "Ж";
+                    if(_leds_color[lamps][led]==_blue)
+                        str += "С";
+                    count++;
+                    if(count == NUM_LEDS/2 || count == NUM_LEDS)
+                    {
+                        str += "\r\n";
+                    }
+
+                    if(count == NUM_LEDS/4 || count == NUM_LEDS/2+NUM_LEDS/2)
+                    {
+                        str += " ";
+                    }
+                }
+            }
+        }
+    }
+    return str;
+}
+
+void LedWS2812BforSTM32::init()
+{
+    _strip.begin();     // Sets up the SPI
+    _strip.show();      // Clears the strip, as by default the strip data is set to all LED's off.
+    //_strip.setBrightness(0);
 }
 
 LedWS2812BforSTM32 Led;

@@ -49,10 +49,10 @@
 #define POSITION_LAMPS     0
 #define DIPPED_BEAM_LAMPS  1
 #define HIGH_BEAM_LAMPS    2
-#define TURN_LEFT_LAMPS    3
-#define TURN_RIGHT_LAMPS   4
-#define BRAKE_LAMPS        5
-#define BACK_LAMPS         6
+#define BRAKE_LAMPS        3
+#define BACK_LAMPS         4
+#define TURN_LEFT_LAMPS    5
+#define TURN_RIGHT_LAMPS   6
 #define FLASHER_LAMPS      7
 
 // Private Methods //////////////////////////////////////////////////////////////
@@ -205,6 +205,7 @@ void LedControl::init(ros::NodeHandle &nh) {
     _nh->subscribe(_brake_sub);
     _nh->subscribe(_flasher_sub);
     _nh->subscribe(_position_sub);
+    Led.init();
 }
 
 void LedControl::indication(){
