@@ -39,13 +39,6 @@
 #define RL 2
 #define RR 3
 
-//SIDE
-#define FRONT 0
-#define REAR  1
-#define RIGHT 2
-#define LEFT  3
-#define ALL   4
-
 //INDICATION STATUS
 #define POSITION_LAMPS     0
 #define DIPPED_BEAM_LAMPS  1
@@ -156,10 +149,10 @@ void LedWS2812BforSTM32::turn(){
 
 void LedWS2812BforSTM32::turn(int mode){
     int side = 5;
-    if(millis() - _time_turn_last >= RATE_TURN_MS)
+    if(millis() - _turn_last_time >= RATE_TURN_MS)
     {
         _turn_count++;
-        _time_turn_last = millis();
+        _turn_last_time = millis();
     }
 
     if(_turn_count<COUNT_LEDS_HEADLIGHT)
@@ -199,30 +192,34 @@ void LedWS2812BforSTM32::turn(int mode){
 }
 
 void LedWS2812BforSTM32::flaser(){
-    if(_indication_status[POSITION_LAMPS])
+    if(_indication_status[FLASHER_LAMPS])
     {
-        //Надо мигать
-        //    int wait = 50;
-        //    for (int b = 0; b <= 5; b++) {
-        //      for (int b = 0; b <= 3; b++) {
-        //        stripShowColor(2, 1, 3, 0, 0, red);
-        //        delay(wait);
-        //        stripShowColor(4, 0, 1, 2, 3, black);
-        //        delay(wait);
-        //      }
-        //      for (int b = 0; b <= 3; b++) {
-        //        stripShowColor(2, 0, 2, 0, 0, blue);
-        //        delay(wait);
-        //        stripShowColor(4, 0, 1, 2, 3, black);
-        //        delay(wait);
-        //      }
-        //    }
-        //    stripShowColor(4, 0, 1, 2, 3, black);
-        //    }
-        //    else
-        //    {
-        //        stripShowColor(4, 0, 1, 2, 3, black);
-        //    }
+        if(millis() - _flasher_last_time >= RATE_FLASHER_MS)
+        {
+            if(_flasher_count==3)
+            {
+                _flasher_side==LEFT ? _flasher_side=RIGHT : _flasher_side=LEFT;
+                _flasher_count=0;
+            }
+
+            if(_flasher_status==false)
+            {
+                setSideColorLeds(_flasher_side, 0, COUNT_LEDS_HEADLIGHT-1, (_flasher_side == LEFT ? _blue : _red_high));
+                setSideColorLeds((_flasher_side == LEFT ? RIGHT : LEFT), 0, COUNT_LEDS_HEADLIGHT-1, _black);
+            }
+            else
+            {
+                setSideColorLeds(ALL, 0, COUNT_LEDS_HEADLIGHT-1, _black);
+                _flasher_count++;
+            }
+            _flasher_status=!_flasher_status;
+            _flasher_last_time = millis();
+        }
+    }
+    else
+    {
+        _flasher_side=LEFT;
+        _flasher_count=0;
     }
 }
 
@@ -307,7 +304,7 @@ String LedWS2812BforSTM32::getData()
                         str += "\r\n";
                     }
 
-                    if(count == NUM_LEDS/4 || count == NUM_LEDS/2+NUM_LEDS/2)
+                    if(count == NUM_LEDS/4 || count == (NUM_LEDS/2+NUM_LEDS/4))
                     {
                         str += " ";
                     }

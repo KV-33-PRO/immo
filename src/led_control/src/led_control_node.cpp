@@ -142,11 +142,11 @@ private:
                 {
                     mode = HEAD_DIPPED_BEAM;
                 }
-                //Включаем дальний свет
-                if(head_mode == HEAD_HIGH_BEAM)
-                {
-                    mode = HEAD_HIGH_BEAM;
-                }
+            }
+            //Включаем дальний свет
+            if(head_mode == HEAD_HIGH_BEAM)
+            {
+                mode = HEAD_HIGH_BEAM;
             }
         }
         return mode;

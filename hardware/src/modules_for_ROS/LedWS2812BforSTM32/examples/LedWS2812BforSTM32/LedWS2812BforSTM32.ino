@@ -11,7 +11,7 @@ bool twin = false;
 bool twin_turn = false;
 
 ros::NodeHandle nh;
-bool indication_status[8];  //мигалка
+bool indication_status[8];
 
 void setup() {
   nh.initNode();
@@ -35,7 +35,6 @@ void changeMode(){
     if (millis() - last_change_ms >= RATE_CHANGE_MS)
     {
         last_change_ms = millis();
-
         if(change_count!=-1){
             if(change_count < 8){
                 indication_status[change_count]=true;
