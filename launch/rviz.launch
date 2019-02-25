@@ -1,0 +1,4 @@
+<launch>
+<!--Запуск rwiz для визуального представления данных-->
+  <include file="$(find hls_lfcd_lds_driver)/launch/view_rviz.launch" />
+</launch>

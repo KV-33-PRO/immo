@@ -1,0 +1,7 @@
+<launch>
+<!--Запуск построения карты-->
+  <include file="$(find hector_slam_launch)/launch/hector_slam.launch" />
+<!--
+  <include file="$(find hector_slam_launch)/launch/hector_ugv.launch" />
+-->
+</launch>

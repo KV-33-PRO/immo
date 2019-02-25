@@ -11,7 +11,9 @@
   <!--Запуск обработки информации с лазерного дальномера-->
   <include file="$(find hls_lfcd_lds_driver)/launch/hlds_laser_segment.launch" />
 
+  <!--Запуск построения карты-->
+  <include file="$(find hector_slam_launch)/launch/hector_slam.launch" />
+
   <!--Запуск управления световой индикацией-->
   <include file="$(find led_control)/launch/led_control.launch" />
-
 </launch>

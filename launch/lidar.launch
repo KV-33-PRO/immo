@@ -1,16 +1,4 @@
-<!--
-  Запуск лидара и rviz для визуального представления данных
- -->
 <launch>
 <!--Запуск лидара и публикация данных в топик "lidar_scan"-->
   <include file="$(find hls_lfcd_lds_driver)/launch/hlds_laser_segment.launch" />
-
-<!--Запуск slam-->
-  <include file="$(find hector_slam_launch)/launch/hector_slam.launch" />
-<!--
-  <include file="$(find hector_slam_launch)/launch/hector_ugv.launch" />
--->
-
-<!--Запуск rwiz для визуального представления данных-->
-  <include file="$(find hls_lfcd_lds_driver)/launch/view_rviz.launch" />
 </launch>

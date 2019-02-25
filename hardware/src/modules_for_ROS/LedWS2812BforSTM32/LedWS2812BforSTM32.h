@@ -10,14 +10,17 @@
 #define RATE_TURN_MS              100
 #define RATE_FLASHER_MS           50
 
+#define LED_SEPARATING_2_MODE     2   //начальный диод разделения (при двух одновременных режимах индикации)
+#define LED_START_FOR_TURN        0   //начальный диод для поворотника (если нужно мигать не всем фонарем)
+
+//#define PIN_LEDS    PA7     //Library uses SPI1. Connect the WS2812B data input to MOSI on your board. (STM32: PA7)
+
 //SIDE
 #define FRONT 0
 #define REAR  1
 #define RIGHT 2
 #define LEFT  3
 #define ALL   4
-
-//#define PIN_LEDS    PA7     //Library uses SPI1. Connect the WS2812B data input to MOSI on your board. (STM32: PA7)
 
 class LedWS2812BforSTM32 {
 public:
@@ -29,7 +32,6 @@ private:
     void position();
     void head();
     void turn();
-    void turn(int mode);
     void backAndBrake();
     void flaser();
     void setSideColorLeds(int side, int led_start, int led_end, uint32_t color);
@@ -53,10 +55,10 @@ private:
     uint32_t _white_low;
 
     int _turn_count;
-    int _turn_status;
+    int _turn_status = false;
     unsigned long _turn_last_time;
 
-    bool _brake_on;
+    bool _brake_on = false;
     unsigned long _brake_last_time;
 
     int _flasher_side=LEFT;
