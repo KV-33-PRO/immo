@@ -126,52 +126,48 @@ void LedWS2812BforSTM32::backAndBrake(){
 }
 
 void LedWS2812BforSTM32::turn(){
-    int side;
-
-    if(_turn_status==false)
+    int side = 5;
+    if(_indication_status[TURN_LEFT_LAMPS] || _indication_status[TURN_RIGHT_LAMPS])
     {
-        _turn_status==true;
-        if(_indication_status[TURN_LEFT_LAMPS] && _indication_status[TURN_RIGHT_LAMPS])
-        {
-            side=ALL;
-        }
-        else
-        {
-            if(_indication_status[TURN_LEFT_LAMPS])
-            {
-                side=LEFT;
-            }
-            if(_indication_status[TURN_RIGHT_LAMPS])
-            {
-                side=RIGHT;
-            }
-        }
+        _turn_status=true;
     }
 
+    if(_indication_status[TURN_LEFT_LAMPS] && _indication_status[TURN_RIGHT_LAMPS])
+    {
+        side=ALL;
+    }
+    else
+    {
+        if(_indication_status[TURN_LEFT_LAMPS])
+        {
+            side=LEFT;
+        }
+        if(_indication_status[TURN_RIGHT_LAMPS])
+        {
+            side=RIGHT;
+        }
+    }
+    setSideColorLeds(side, LED_START_FOR_TURN, COUNT_LEDS_HEADLIGHT-1, _black);
+    if(_turn_count<COUNT_LEDS_HEADLIGHT && _turn_status == true)
+    {
+        setSideColorLeds(side, LED_START_FOR_TURN, _turn_count, _yelloy);
+    }
+    else
+    {
+        _turn_count=LED_START_FOR_TURN;
+        _turn_status=false;
+    }
     if(millis() - _turn_last_time >= RATE_TURN_MS)
     {
         _turn_count++;
         _turn_last_time = millis();
-    }
-
-    if(_turn_status == true)
-    {
-        setSideColorLeds(side, LED_START_FOR_TURN, COUNT_LEDS_HEADLIGHT-1, _black);
-        if(_turn_count<COUNT_LEDS_HEADLIGHT)
-        {
-            setSideColorLeds(side, LED_START_FOR_TURN, _turn_count, _yelloy);
-        }
-        else
-        {
-            _turn_count=LED_START_FOR_TURN;
-            _turn_status=false;
-        }
     }
 }
 
 void LedWS2812BforSTM32::flaser(){
     if(_indication_status[FLASHER_LAMPS])
     {
+        setSideColorLeds(ALL, 0, COUNT_LEDS_HEADLIGHT-1, _black);
         if(millis() - _flasher_last_time >= RATE_FLASHER_MS)
         {
             if(_flasher_count==3)
@@ -183,7 +179,6 @@ void LedWS2812BforSTM32::flaser(){
             if(_flasher_status==false)
             {
                 setSideColorLeds(_flasher_side, 0, COUNT_LEDS_HEADLIGHT-1, (_flasher_side == LEFT ? _blue : _red_high));
-                setSideColorLeds((_flasher_side == LEFT ? RIGHT : LEFT), 0, COUNT_LEDS_HEADLIGHT-1, _black);
             }
             else
             {
@@ -218,10 +213,10 @@ LedWS2812BforSTM32::LedWS2812BforSTM32()
     _yelloy = _strip.Color(255, 128, 0);
     _blue = _strip.Color(0, 0, 255);
     _red_high = _strip.Color(255, 0, 0);
-    _red_low = _strip.Color(100, 0, 0);
+    _red_low = _strip.Color(70, 0, 0);
     _white_high = _strip.Color(255, 255, 255);
-    _white_middle = _strip.Color(180, 180, 180);
-    _white_low = _strip.Color(100, 100, 100);
+    _white_middle = _strip.Color(150, 150, 180);
+    _white_low = _strip.Color(70, 70, 70);
     _black = _strip.Color(0, 0, 0);
 
     _turn_count = 0;
@@ -235,7 +230,6 @@ LedWS2812BforSTM32::LedWS2812BforSTM32()
 
 void LedWS2812BforSTM32::indication(bool *indication_status)
 {
-    //_indication_status=&indication_status;
     for(int status = 0; status<COUNT_INDICATION_STATUS; status++){
         _indication_status[status] = indication_status[status];
     }
