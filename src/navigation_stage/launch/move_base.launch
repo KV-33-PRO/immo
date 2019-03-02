@@ -1,0 +1,31 @@
+<launch>
+  <master auto="start"/>
+
+  <node pkg="stage_ros" type="stageros" name="stageros" args="$(optenv ROS_STAGE_GRAPHICS -g) $(find navigation_stage)/stage_config/worlds/map.world" respawn="false" output="screen">
+    <param name="base_watchdog_timeout" value="0.2"/>
+  </node>
+
+  <!-- Run the map server -->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find navigation_stage)/stage_config/maps/map.yaml"/>
+
+  <!--- Run AMCL -->
+
+  <node name="fake_localization" pkg="fake_localization" type="fake_localization" respawn="false" />
+
+
+  <include file="$(find navigation_stage)/move_base_config/amcl.launch"/>
+   <!---->
+
+
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <rosparam file="$(find navigation_stage)/move_base_config/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find navigation_stage)/move_base_config/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find navigation_stage)/move_base_config/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find navigation_stage)/move_base_config/global_costmap_params.yaml" command="load" />
+
+    <rosparam file="$(find navigation_stage)/move_base_config/base_local_planner_params.yaml" command="load" />
+  </node>
+
+<node pkg="tf" type="static_transform_publisher" name="map_laser_link" args="0.10 0.0 0.15 0.0 0.0 0.0 /map /laser_link 50" />
+<!---->
+</launch>

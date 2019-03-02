@@ -181,6 +181,7 @@ private:
     }
 
 public:
+
     LedControl(ros::NodeHandle &n){
         nh = n;
         cmd_vel_sub = nh.subscribe("cmd_vel", 10, &LedControl::cmd_velCallBack, this);
@@ -198,11 +199,20 @@ public:
         ros::spinOnce();
         ros::Rate r(10);
 
+        ros::NodeHandle priv_nh("~");
+        int pr_position;
+        int pr_flasher;
+        int pr_head;
+
+        priv_nh.param("position_lamps", pr_position, POSITION_LAMPS_ON);
+        priv_nh.param("head_lamps", pr_head, HEAD_HIGH_BEAM);
+        priv_nh.param("flasher_lamps", pr_flasher, FLASHER_OFF);
+
         //Режим работы габаритных огней
-        position.data = positionMode(POSITION_LAMPS_ON);
+        position.data = positionMode(pr_position);
 
         //Режим работы головного света
-        head.data = headMode(HEAD_HIGH_BEAM);
+        head.data = headMode(pr_head);
 
         //Режим работы поворотников
         turn.data = turnMode();
@@ -214,7 +224,7 @@ public:
         back.data = backMode();
 
         //Режим работы мигалки
-        flasher.data = flesherMode(FLASHER_OFF);
+        flasher.data = flesherMode(pr_flasher);
 
         //Публикация значений в топики
         head_pub.publish(head);

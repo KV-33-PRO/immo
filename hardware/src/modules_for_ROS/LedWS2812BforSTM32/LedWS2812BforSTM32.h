@@ -37,10 +37,10 @@ private:
     void setSideColorLeds(int side, int led_start, int led_end, uint32_t color);
     void show();
 
-    int _leds[NUM_LEDS/COUNT_LEDS_HEADLIGHT][COUNT_LEDS_HEADLIGHT]={{4, 3, 2, 1, 0},         //0 - левая передная
-                                                                    {5, 6, 7, 8, 9},         //1 - правая передняя
-                                                                    {14 ,13 ,12, 11, 10},    //2 - левая задняя
-                                                                    {15, 16, 17, 18, 19}};  //3 - правая задняя*/
+    int _leds[NUM_LEDS/COUNT_LEDS_HEADLIGHT][COUNT_LEDS_HEADLIGHT]={{14, 13, 12, 11, 10},         //0 - левая передная
+                                                                    {15, 16, 17, 18, 19},         //1 - правая передняя
+                                                                    {4 ,3 ,2, 1, 0},    //2 - левая задняя
+                                                                    {5, 6, 7, 8, 9}};  //3 - правая задняя*/
     uint32_t _leds_color[NUM_LEDS/COUNT_LEDS_HEADLIGHT][COUNT_LEDS_HEADLIGHT];
     bool _indication_status[COUNT_INDICATION_STATUS];
 

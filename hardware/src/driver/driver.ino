@@ -4,6 +4,7 @@
 #include <sensor_msgs/JointState.h>
 #include <sensor_msgs/BatteryState.h>
 
+#include <LedControl.h>
 #include <Battery.h>
 
 #define RATE_MS                   20       // задержка для публикации в топик
@@ -55,6 +56,7 @@ uint8_t battery_pins[4] = {
 };
 
 Battery battery("/battery", battery_pins, sizeof(battery_pins) / sizeof(uint8_t));
+LedControl led;
 
 ros::NodeHandle nh;
 
@@ -86,6 +88,7 @@ void setup() {
   attachInterrupt(ENCODER_RIGHT_PIN, doEncoderRight, CHANGE);
 
   battery.init(nh);
+  led.init(nh);
 
   Dynamixel.begin(1000000, RUDDER_DATA_CONTROL_PIN);
   for (int blink = 0; blink < 5; blink++)          //инициализация (мигаем диодом на dynamixel)
@@ -98,7 +101,7 @@ void setup() {
   angular = DUNAMIXEL_CENTER;
   Dynamixel.move(DYNAMIXEL_ID, angular);       //установить dynamixel в центральное положение
 
-  nh.getHardware()->setBaud(500000);
+  nh.getHardware()->setBaud(1000000);
   nh.initNode();
   nh.subscribe(drive_sub);
   nh.advertise(state_pub);
@@ -135,6 +138,14 @@ void loop() {
     state_vel[1] = state_pos[1] / (t / 1000.0);
     state_pos[2] = dynamixel2angular(Dynamixel.readPosition(DYNAMIXEL_ID)); //Получаем значение положения руля
     state_msg.header.stamp = nh.now();     //фиксируем время сообщения
+
+    //DEBUG INFO
+    String str = "left_wheel: " + String(state_pos[0]) + " right_wheel: " + String(state_pos[1]) + " middle_wheel: " + String(state_pos[0]+state_pos[1]/2) + " motor_value: " + String(state_eff[2]);
+    int str_len = str.length() + 1;
+    char char_array[str_len];
+    str.toCharArray(char_array, str_len);
+    nh.logwarn(char_array);
+
     state_pub.publish(&state_msg);      //публикуем сообщение в топик
     state_pos[0] = 0;      //обнуляем счетчики
     state_pos[1] = 0;
@@ -149,6 +160,7 @@ void loop() {
     }
 
     battery.publicBatteryInfo();
+    led.indication();
   }
   nh.spinOnce();
 }

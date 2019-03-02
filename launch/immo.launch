@@ -2,7 +2,7 @@
   <!--Запуск соединения с микроконтроллером для управления-->
   <node name="immo_driver" pkg="rosserial_python" respawn="true" type="serial_node.py">
     <param name="port" value="/dev/ttyACM0"/>
-    <param name="baud" value="500000"/>
+    <param name="baud" value="1000000"/>
   </node>
 
   <!--Запуск пересчета одометрии-->

@@ -1,0 +1,4 @@
+<launch>
+  <include file="$(find navigation_stage)/launch/move_base.launch" />
+  <include file="$(find navigation_stage)/launch/nav_rviz.launch" />
+</launch>
