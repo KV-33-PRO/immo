@@ -15,5 +15,21 @@ echo export ROS_HOSTNAME=IP_OF_ROBOT >> ~/.bashrc
 echo export ROS_MASTER_URI=http://IP_OF_ROBOT:11311 >> ~/.bashrc
 echo export ROS_HOSTNAME=IP_OF_PC >> ~/.bashrc
 
+///////////////////////////////////////////////////////////////////////
 
+Необходимые пакеты для работы навигации:
+
+sudo apt-get install ros-kinetic-map-server
+sudo apt-get install ros-kinetic-bfl
+
+///////////////////////////////////////////////////////////////////////
+
+Настройка прав доступа к устройствам подключенным по USB.
+
+Если вылетает ошибка доступа, создаем файл:
+sudo nano /etc/udev/rules.d/50-myusb.rules
+
+Вставляем следующий текст:
+KERNEL=="ttyUSB[0-9]*",MODE="0666"
+KERNEL=="ttyACM[0-9]*",MODE="0666"
 
