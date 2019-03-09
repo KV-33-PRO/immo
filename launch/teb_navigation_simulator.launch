@@ -1,0 +1,3 @@
+<launch>
+  <include file="$(find teb_navigation_stage)/launch/simulator_robot_carlike_in_stage.launch" />
+</launch>

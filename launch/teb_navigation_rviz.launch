@@ -1,0 +1,3 @@
+<launch>
+  <include file="$(find teb_navigation_stage)/launch/rviz_robot_carlike.launch" />
+</launch>

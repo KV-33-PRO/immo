@@ -5,6 +5,7 @@ sudo apt-get install ros-kinetic-map-server
 
 Запустим узел map_saver из пакета:
 rosrun map_server map_saver
+rosrun map_server map_saver -f mymap
 
 После выполнения будет создано два файла: map.pgm и map.yaml в текущей директории.
 В файле map.pgm будет сохранена карта.
