@@ -1,19 +1,20 @@
-//#include <DynamixelSerial3.h>
+#include <DynamixelSerial3.h>
 #include <ros.h>
 #include <geometry_msgs/Twist.h>
 #include <sensor_msgs/JointState.h>
 #include <sensor_msgs/BatteryState.h>
 
 //#include <LedControl.h>
-#include <Battery.h>
+//#include <Battery.h>
 
 #define RATE_MS                   20       // задержка для публикации в топик
 #define RATE_MS_PARAMS            1000     // задержка для обновления параметров
 #define TIME_TO_LIVE_MS           1000     // задержка для остановки движения при отсутствии сообщений в топике cmd_vel
+#define RATE_MS_DYNAMIXEL         50       // задержка управления рулем
 
 #define Kp                        167.0    // пропорциональный коэффициент для ПИД регулятора (41.7)
-#define Ki                        0.0      // интегральный коэффициент для ПИД регулятора
-#define Kd                        0.0      // дифференциальный коэффициент для ПИД регулятора   
+#define Ki                        0.1      // интегральный коэффициент для ПИД регулятора
+#define Kd                        0.4      // дифференциальный коэффициент для ПИД регулятора
 #define K_SPEED                   0.63     // коэффициент неадекватной скорости
 
 #define WHEEL_DIAMETER            0.151    // диаметр колеса в метрах
@@ -49,10 +50,11 @@ float state_eff[NUM_JOINTS] = {0, 0, 0};
 unsigned long last_ms;
 unsigned long last_ms_params;
 unsigned long last_msgs_cmd_vel_ms;
+unsigned long last_dynamixel_ms;
 
 volatile float enc_left;
 volatile float enc_right;
-
+/*
 uint8_t battery_pins[4] = {
     BAT_BALANCE_PIN_1,
     BAT_BALANCE_PIN_2,
@@ -60,7 +62,9 @@ uint8_t battery_pins[4] = {
     BAT_BALANCE_PIN_4
 };
 
+
 Battery battery("/battery", battery_pins, sizeof(battery_pins) / sizeof(uint8_t));
+*/
 //LedControl led;
 
 ros::NodeHandle nh;
@@ -96,11 +100,11 @@ void setup() {
   attachInterrupt(ENCODER_LEFT_PIN, doEncoderLeft, CHANGE);      //инициализация прерываний для энкодеров
   attachInterrupt(ENCODER_RIGHT_PIN, doEncoderRight, CHANGE);
 
-  battery.init(nh);
+  //battery.init(nh);
   //led.init(nh);
-  /*
+
   Dynamixel.begin(1000000, RUDDER_DATA_CONTROL_PIN);
-  
+  /*
   for (int blink = 0; blink < 5; blink++)          //инициализация (мигаем диодом на dynamixel)
   {
     Dynamixel.ledStatus(DYNAMIXEL_ID, ON);
@@ -110,7 +114,7 @@ void setup() {
   }
   */
   angular = DUNAMIXEL_CENTER;
-  //Dynamixel.move(DYNAMIXEL_ID, angular);       //установить dynamixel в центральное положение
+  Dynamixel.move(DYNAMIXEL_ID, angular);       //установить dynamixel в центральное положение
 
   nh.getHardware()->setBaud(115200);
   nh.initNode();
@@ -144,10 +148,17 @@ void update_motors() {
   {
     cmd_linear = 0;
   }
-  angular = angular2dynamixel(cmd_angular);  //выполняем расчет значения для сервомотора
+
   linear = linear2driverMotor(cmd_linear);   //выполняем расчет значения для драйвера двигателей
-  //Dynamixel.move(DYNAMIXEL_ID, angular);     //выполняем поворот динамикселя на нужный угол
-  driverMotor(linear);                       //выполняем движение моторов  
+  driverMotor(linear);
+
+  if(millis() - last_dynamixel_ms > RATE_MS_DYNAMIXEL)
+  {
+  last_dynamixel_ms = millis();
+  angular = angular2dynamixel(cmd_angular);  //выполняем расчет значения для сервомотора
+  Dynamixel.move(DYNAMIXEL_ID, angular);     //выполняем поворот динамикселя на нужный угол
+  state_pos[2] = dynamixel2angular(Dynamixel.readPosition(DYNAMIXEL_ID)); //Получаем значение положения руля
+  }
 }
 
 void loop() {
@@ -167,7 +178,6 @@ void loop() {
 
     state_vel[0] = state_pos[0] / (t / 1000.0); //преобразуем в рад/с
     state_vel[1] = state_pos[1] / (t / 1000.0);
-    //state_pos[2] = dynamixel2angular(Dynamixel.readPosition(DYNAMIXEL_ID)); //Получаем значение положения руля
 
     state_msg.header.stamp = nh.now();     //фиксируем время сообщения
 
@@ -195,7 +205,7 @@ void loop() {
 
     state_pub.publish(&state_msg);      //публикуем сообщение в топик
   
-    battery.publicBatteryInfo();
+    //battery.publicBatteryInfo();
     //led.indication();
   }
   nh.spinOnce();
