@@ -84,5 +84,5 @@ car
 
   	# Report error-free position in world coordinates
         localization "gps"
-  	localization_origin [ 0 0 0 0 ]
+        localization_origin [ 0 0 0 0 ]
 )

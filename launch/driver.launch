@@ -1,7 +1,15 @@
 <launch>
+  <rosparam param="/pid">[167.0, 0.1, 0.4]</rosparam>
+
   <!--Запуск соединения с микроконтроллером для управления-->
   <node name="immo_driver" pkg="rosserial_python" respawn="true" type="serial_node.py">
     <param name="port" value="/dev/ttyACM0"/>
     <param name="baud" value="1000000"/>
   </node>
+
+  <!--
+     Command for console:	
+     rosparam set /pid "[167.0, 0.1, 0.4]"
+  -->
+
 </launch>

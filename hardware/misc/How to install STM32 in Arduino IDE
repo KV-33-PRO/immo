@@ -40,4 +40,4 @@ $ sudo udevadm control --reload-rules
 
 Если говорит мол не могу найти файл upload-reset:
 Необходимо заменить файл upload-reset на тот что лежит в папке
-/home/user/.arduino15/packages/stm32duino/tools/stm32tools/2019.2.4/linux/
+/home/user/.arduino15/packages/stm32duino/tools/stm32tools/2019.2.28/linux/
