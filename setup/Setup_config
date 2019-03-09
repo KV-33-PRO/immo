@@ -22,6 +22,9 @@ echo export ROS_HOSTNAME=IP_OF_PC >> ~/.bashrc
 sudo apt-get install ros-kinetic-map-server
 sudo apt-get install ros-kinetic-bfl
 
+sudo apt install libsuitesparse-dev
+sudo apt-get install ros-kinetic-libg2o
+
 ///////////////////////////////////////////////////////////////////////
 
 Настройка прав доступа к устройствам подключенным по USB.
