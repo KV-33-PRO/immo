@@ -19,7 +19,10 @@
   -->
 
   <!--Запуск стека навигации-->
+  <include file="$(find teb_navigation_stage)/launch/robot_carlike_in_stage.launch" />
+  <!--
   <include file="$(find navigation_stage)/launch/move_base.launch" />
+  -->
 
   <!--Запуск управления световой индикацией-->
   <include file="$(find led_control)/launch/led_control.launch" />

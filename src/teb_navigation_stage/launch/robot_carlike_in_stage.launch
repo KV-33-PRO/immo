@@ -31,7 +31,6 @@
                 <param name="clearing_rotation_allowed" value="false" /> <!-- Our carlike robot is not able to rotate in place -->
 	</node>
 
-
 	<!--  ****** Maps *****  -->
         <node name="map_server" pkg="map_server" type="map_server" args="$(find teb_navigation_stage)/maps/map.yaml" output="screen">
 		<param name="frame_id" value="/map"/>

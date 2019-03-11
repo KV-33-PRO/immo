@@ -1,7 +1,7 @@
 Настройка сети.
 
 Выполните подключение по SSH к роботу:
-ssh turtle@<IP_OF_ROBOT>
+ssh robot@<IP_OF_ROBOT>
 
 Необходимо заменить <IP_OF_ROBOT> именем хоста или IP-адресом робота.
 
@@ -14,6 +14,33 @@ echo export ROS_HOSTNAME=IP_OF_ROBOT >> ~/.bashrc
 
 echo export ROS_MASTER_URI=http://IP_OF_ROBOT:11311 >> ~/.bashrc
 echo export ROS_HOSTNAME=IP_OF_PC >> ~/.bashrc
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+или просто добавить следующий кусок в .bashrc и не парить мозг (при подключенной определенной сети будет переопределен ROS_MASTER):
+
+#START FOR ROS
+#IP адрес робота и имя wifi сети к котой мы должны быть подключенны
+ip_robot=192.168.0.1
+wifi_name="IMMO"
+
+wifi=$(iwgetid -r)
+if [ "$wifi" != "" ]; then
+  interface=$(iwgetid | cut -d " " -f 1)
+  ip_wifi=$(ifconfig "$interface" | grep "inet addr:" | cut -d " " -f 12 | cut -d : -f 2)
+  if [ "$wifi" = "$wifi_name" ]; then
+    export ROS_MASTER_URI=http://"$ip_robot":11311
+    export ROS_HOSTNAME="$ip_wifi"
+    echo !!! ROS_MASTER = ROBOT !!!
+  fi
+fi
+#END FOR ROS
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+так же в .bashrc должны находиться строки:
+
+source /opt/ros/kinetic/setup.bash
+source /home/user/immo/devel/setup.bash
 
 ///////////////////////////////////////////////////////////////////////
 
