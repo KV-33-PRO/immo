@@ -8,10 +8,6 @@
   - rviz view
  -->
 <launch>
-
-        <!--  ************** Global Parameters ***************  -->
-        <param name="/use_sim_time" value="true"/>
-
         <!--  ************** Navigation ***************  -->
 	<node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
                 <rosparam file="$(find teb_navigation_stage)/cfg/carlike/costmap_common_params.yaml" command="load" ns="global_costmap" />
@@ -39,8 +35,8 @@
 	<node pkg="amcl" type="amcl" name="amcl" output="screen">
                 <rosparam file="$(find teb_navigation_stage)/cfg/amcl_params.yaml" command="load" />
 
-                <param name="initial_pose_x"            value="0"/>
-                <param name="initial_pose_y"            value="0"/>
-		<param name="initial_pose_a"            value="0"/>
+                <param name="initial_pose_x"            value="-33"/>
+                <param name="initial_pose_y"            value="+0.5"/>
+                <param name="initial_pose_a"            value="0"/>
 	</node>
 </launch>

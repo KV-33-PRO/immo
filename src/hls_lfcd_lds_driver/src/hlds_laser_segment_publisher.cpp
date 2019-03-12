@@ -133,7 +133,7 @@ int main(int argc, char **argv)
   try
   {
     hls_lfcd_lds::LFCDLaser laser(port, baud_rate, io);
-    ros::Publisher laser_pub = n.advertise<sensor_msgs::LaserScan>("lidar_scan", 1000);
+    ros::Publisher laser_pub = n.advertise<sensor_msgs::LaserScan>("scan", 1000);
     ros::Publisher motor_pub = n.advertise<std_msgs::UInt16>("lidar_rpms",1000);
     sensor_msgs::LaserScan::Ptr scan(new sensor_msgs::LaserScan);
 
