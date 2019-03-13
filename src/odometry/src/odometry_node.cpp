@@ -16,56 +16,129 @@ double vy  = 0.0;   // m/s
 double vth = 0.0;   // radian/s
 
 ros::Time prev_time;
+bool prev_time_init = false;
 
-double dist  = 0.0;
-double angular  = 0.0;
-
+double linear_speed = 0.0;
+double linear_offset = 0.0;
+double rudder_angle  = 0.0;
 
 void jointStatesCallback(const sensor_msgs::JointState& msg)
 {
-  double dt = (msg.header.stamp - prev_time).toSec();
-  if(dt < 10 && dt > 0) {
-    angular = 0;
-    dist = 0;
-    for(int i = 0; i < msg.name.size(); i++){
-      if(msg.name[i].compare("left_wheel") == 0 & msg.name[i+1].compare("right_wheel") == 0) {
-          dist = ((msg.velocity[i]+msg.velocity[i+1])/2)*dt*(d/2);   // Перевод рад/с > рад > метры   (пройденный путь)
-          i++;
-      } else if(msg.name[i].compare("rudder") == 0) {
-          angular = msg.position[i];  //радиан
-      }
+    if(msg.name.size() == 3 && msg.name[0].compare("left_wheel") == 0 && msg.name[1].compare("right_wheel") == 0 && msg.name[2].compare("rudder") == 0) {
+        if(prev_time_init) {
+            linear_speed = ((msg.velocity[0] + msg.velocity[1]) / 2) * (d / 2);
+            linear_offset = ((msg.position[0] + msg.position[1]) / 2) * (d / 2);
+            rudder_angle = msg.position[2];
+            vth = linear_speed * tan(rudder_angle) / aw;
+            ros::Duration dt = msg.header.stamp - prev_time;
+            double x_dot = linear_speed * cos(th);
+            double y_dot = linear_speed * sin(th);
+            x += x_dot * dt.toSec();
+            y += y_dot * dt.toSec();
+            th += vth * dt.toSec();
+        }
+        prev_time = msg.header.stamp;
+        prev_time_init = true;
+        ROS_INFO("Rudder: %0.2f; V: %0.2f; S: %0.2f; X: %0.2f; Y: %0.2f; Th: %0.2f;", rudder_angle, linear_speed, linear_offset, x, y, th);
     }
 
-    double delta_th;
-    if(angular != 0) {
-      delta_th = dist/(aw/tan(angular));
-    } else {
-      delta_th = 0;
-    }
-    double delta_x = dist * cos(th + delta_th/2);
-    double delta_y = dist * sin(th + delta_th/2);
 
-    x += delta_x;
-    y += delta_y;
-    th += delta_th;
+        /*
+        double dt = (msg.header.stamp - prev_time).toSec();
+        if(dt < 10 && dt > 0) {
+            angular = 0;
+            dist = 0;
+            speed = 0;
+            for(int i = 0; i < msg.name.size(); i++){
+                if(msg.name[i].compare("left_wheel") == 0 & msg.name[i+1].compare("right_wheel") == 0) {
+                    speed = ((msg.velocity[i]+msg.velocity[i+1])/2)*(d/2);
+                    dist = speed * dt;
+                    i++;
+                } else if(msg.name[i].compare("rudder") == 0) {
+                    angular = msg.position[i];  //радиан
+                }
+            }
 
-    vx = delta_x/dt;
-    vy = delta_y/dt;
-    vth = delta_th/dt;
-  }
-  prev_time = msg.header.stamp;
-  ROS_INFO("Angular: %0.2f; Velocity: %0.2f; Time (dt): %0.4f; X: %0.2f; Y: %0.2f; Th: %0.2f", angular, dist, dt, x, y, th);
+            double delta_th;
+            if(angular != 0) {
+                delta_th = dist/(aw/tan(angular));
+            } else {
+                delta_th = 0;
+            }
+
+            double delta_x = dist * cos(th + delta_th/2);
+            double delta_y = dist * sin(th + delta_th/2);
+
+            x += delta_x;
+            y += delta_y;
+            th += delta_th;
+
+            vx = delta_x/dt;
+            vy = delta_y/dt;
+            vth = delta_th/dt;
+            ROS_INFO("Angular: %0.2f; Velocity: %0.2f; Time (dt): %0.4f; X: %0.2f; Y: %0.2f; Th: %0.2f", angular, dist, dt, x, y, th);
+        }
+        */
+
 }
 
 int main(int argc, char** argv){
   ros::init(argc, argv, "odometry_node");
   ros::NodeHandle n;
   ros::Subscriber sub = n.subscribe("joint_states", 10, jointStatesCallback);
-  ros::Publisher pub = n.advertise<nav_msgs::Odometry>("odom", 50);
+  ros::Publisher odom_pub = n.advertise<nav_msgs::Odometry>("odom", 10);
 
-  ros::Rate r(50);
+  boost::shared_ptr<tf::TransformBroadcaster> tf_pub;
+  tf_pub.reset(new tf::TransformBroadcaster);
+
+  ROS_INFO("Odometry initialized");
+
+  ros::Rate r(20);
+
   while(ros::ok()){
     ros::spinOnce();
+
+    // publish odometry message
+    nav_msgs::Odometry::Ptr odom(new nav_msgs::Odometry);
+    odom->header.frame_id = "odom";
+    odom->header.stamp = ros::Time::now();
+    odom->child_frame_id = "base_link";
+
+    // Position
+    odom->pose.pose.position.x = x;
+    odom->pose.pose.position.y = y;
+    odom->pose.pose.orientation.x = 0.0;
+    odom->pose.pose.orientation.y = 0.0;
+    odom->pose.pose.orientation.z = sin(th/2.0);
+    odom->pose.pose.orientation.w = cos(th/2.0);
+
+    // Position uncertainty
+    odom->pose.covariance[0]  = 0.01; ///< x
+    odom->pose.covariance[7]  = 0.01; ///< y
+    odom->pose.covariance[35] = 0.01; ///< yaw
+
+    // Velocity ("in the coordinate frame given by the child_frame_id")
+    odom->twist.twist.linear.x = linear_speed;
+    odom->twist.twist.linear.y = 0.0;
+    odom->twist.twist.angular.z = vth;
+
+    // Velocity uncertainty
+    geometry_msgs::TransformStamped tf;
+    tf.header.frame_id = odom->header.frame_id;
+    tf.child_frame_id = odom->child_frame_id;
+    tf.header.stamp = ros::Time::now();
+    tf.transform.translation.x = x;
+    tf.transform.translation.y = y;
+    tf.transform.translation.z = 0.0;
+    tf.transform.rotation = odom->pose.pose.orientation;
+    if (ros::ok()) {
+        tf_pub->sendTransform(tf);
+    }
+    if (ros::ok()) {
+        odom_pub.publish(odom);
+    }
+
+    /*
     geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(th);
     nav_msgs::Odometry odom;
 
@@ -82,6 +155,7 @@ int main(int argc, char** argv){
     odom.twist.twist.angular.z = vth;
 
     pub.publish(odom);
+    */
     r.sleep();
   }
   return 0;
