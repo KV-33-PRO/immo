@@ -8,6 +8,12 @@
   - rviz view
  -->
 <launch>
+<master auto="start"/>
+
+<node pkg="stage_ros" type="stageros" name="stageros" args="$(optenv ROS_STAGE_GRAPHICS -g) $(find teb_navigation_stage)/stage/map_carlike.world" respawn="false" output="screen">
+  <param name="base_watchdog_timeout" value="0.2"/>
+</node>
+
         <!--  ************** Navigation ***************  -->
 	<node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
                 <rosparam file="$(find teb_navigation_stage)/cfg/carlike/costmap_common_params.yaml" command="load" ns="global_costmap" />
@@ -35,8 +41,15 @@
 	<node pkg="amcl" type="amcl" name="amcl" output="screen">
                 <rosparam file="$(find teb_navigation_stage)/cfg/amcl_params.yaml" command="load" />
 
-                <param name="initial_pose_x"            value="-33"/>
-                <param name="initial_pose_y"            value="+0.5"/>
+                <param name="scan"                      value="scan"/>
+                <param name="initial_pose_x"            value="-32.0"/>
+                <param name="initial_pose_y"            value="-32.0"/>
                 <param name="initial_pose_a"            value="0"/>
 	</node>
+
+<!--
+        <node pkg="tf" type="static_transform_publisher" name="map_to_odom" args="-32.0 -32.0 0.0 0.0 0.0 0.0 /map /odom 50" />
+
+        <node pkg="tf" type="static_transform_publisher" name="base_link_to_laser" args="-0.18 0.0 0.0 0.0 0.0 0.0 /base_link /laser 50" />
+        -->
 </launch>

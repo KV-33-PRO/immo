@@ -126,7 +126,7 @@ int main(int argc, char **argv)
 
   priv_nh.param("port", port, std::string("/dev/ttyUSB0"));
   priv_nh.param("baud_rate", baud_rate, 230400);
-  priv_nh.param("frame_id", frame_id, std::string("laser_link"));
+  priv_nh.param("frame_id", frame_id, std::string("laser"));
 
   boost::asio::io_service io;
 
@@ -134,7 +134,7 @@ int main(int argc, char **argv)
   {
     hls_lfcd_lds::LFCDLaser laser(port, baud_rate, io);
     ros::Publisher laser_pub = n.advertise<sensor_msgs::LaserScan>("scan", 1000);
-    ros::Publisher motor_pub = n.advertise<std_msgs::UInt16>("lidar_rpms",1000);
+    ros::Publisher motor_pub = n.advertise<std_msgs::UInt16>("rpms",1000);
     sensor_msgs::LaserScan::Ptr scan(new sensor_msgs::LaserScan);
 
     scan->header.frame_id = frame_id;
