@@ -3,11 +3,11 @@ local_costmap:
   robot_base_frame: base_link
   update_frequency: 5.0
   publish_frequency: 2.0
-  static_map: false
+  static_map: false        #!true
   rolling_window: true
-  width: 5.5
-  height: 5.5
-  resolution: 0.1
+  width: 6.0               #5.5
+  height: 6.0              #5.5
+  resolution: 0.1          #!0.05
   transform_tolerance: 0.5
   
   plugins:

@@ -34,5 +34,5 @@ define carlike_robot position
   wheelbase 0.333 # distance between both axles
   
   # spawn sensors
-  laser(pose [ -0.18 0.0 0.0 0.0 ])
+  laser(pose [ -0.18 0.0 -0.15 0.0 ])
 )

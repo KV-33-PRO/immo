@@ -7,7 +7,7 @@
 <arg name="map_size" default="2000"/>
 <arg name="pub_map_odom_transform" default="true"/>
 
-  <node pkg="tf" type="static_transform_publisher" name="laser_link" args="-0.18 0.0 0.0 0.0 0.0 0.0 /base_link /laser_link 50" />
+  <node pkg="tf" type="static_transform_publisher" name="base_laser_link" args="-0.18 0.0 0.0 0.0 0.0 0.0 /base_link /base_laser_link 50" />
   <node pkg="hector_mapping" type="hector_mapping" name="hector_mapping" output="screen">
 
     <!-- Frame names -->
@@ -41,7 +41,7 @@
 
 <node pkg="hector_trajectory_server" type="hector_trajectory_server" name="hector_trajectory_server" output="screen">
   <param name="target_frame_name" type="string" value="/map" />
-  <param name="source_frame_name" type="string" value="/laser_link" />
+  <param name="source_frame_name" type="string" value="/base_laser_link" />
   <param name="trajectory_update_rate" type="double" value="4" />
   <param name="trajectory_publish_rate" type="double" value="0.25" />
 </node>

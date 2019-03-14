@@ -20,15 +20,22 @@ echo export ROS_HOSTNAME=IP_OF_PC >> ~/.bashrc
 
 #START FOR ROS
 #IP адрес робота и имя wifi сети к котой мы должны быть подключенны
-ip_robot=192.168.0.1
-wifi_name="IMMO"
+ip_robot1=192.168.0.1
+ip_robot2=192.168.2.1
+wifi_name1="IMMO"
+wifi_name2="KV33-NET"
 
 wifi=$(iwgetid -r)
 if [ "$wifi" != "" ]; then
   interface=$(iwgetid | cut -d " " -f 1)
   ip_wifi=$(ifconfig "$interface" | grep "inet addr:" | cut -d " " -f 12 | cut -d : -f 2)
-  if [ "$wifi" = "$wifi_name" ]; then
-    export ROS_MASTER_URI=http://"$ip_robot":11311
+  if [ "$wifi" = "$wifi_name1" ] ; then
+    export ROS_MASTER_URI=http://"$ip_robot1":11311
+    export ROS_HOSTNAME="$ip_wifi"
+    echo !!! ROS_MASTER = ROBOT !!!
+  fi
+  if [ "$wifi" = "$wifi_name2" ] ; then
+    export ROS_MASTER_URI=http://"$ip_robot2":11311
     export ROS_HOSTNAME="$ip_wifi"
     echo !!! ROS_MASTER = ROBOT !!!
   fi
