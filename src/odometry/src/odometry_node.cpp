@@ -3,6 +3,8 @@
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/JointState.h>
 #include <geometry_msgs/Quaternion.h>
+#include <geometry_msgs/Pose2D.h>
+#include "odometry/SetPose.h"
 
 double aw  = 0.333;   // межосевое расстояние (в метрах)
 double d = 0.151;     // диаметр колеса (в метрах)
@@ -21,6 +23,15 @@ bool prev_time_init = false;
 double linear_speed = 0.0;
 double linear_offset = 0.0;
 double rudder_angle  = 0.0;
+
+bool setPoseHandler(odometry::SetPose::Request  &req,
+         odometry::SetPose::Response &res)
+{
+    x = req.pose.x;
+    y = req.pose.y;
+    th = req.pose.theta;
+    return true;
+}
 
 void jointStatesCallback(const sensor_msgs::JointState& msg)
 {
@@ -87,6 +98,7 @@ int main(int argc, char** argv){
   ros::NodeHandle n;
   ros::Subscriber sub = n.subscribe("joint_states", 10, jointStatesCallback);
   ros::Publisher odom_pub = n.advertise<nav_msgs::Odometry>("odom", 10);
+  ros::ServiceServer service = n.advertiseService("odometry_set_pose", setPoseHandler);
 
   boost::shared_ptr<tf::TransformBroadcaster> tf_pub;
   tf_pub.reset(new tf::TransformBroadcaster);
