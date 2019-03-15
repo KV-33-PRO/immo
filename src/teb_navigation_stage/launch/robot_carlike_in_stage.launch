@@ -11,7 +11,7 @@
 <master auto="start"/>
 
 <node pkg="stage_ros" type="stageros" name="stageros" args="$(optenv ROS_STAGE_GRAPHICS -g) $(find teb_navigation_stage)/stage/map_carlike.world" respawn="false" output="screen">
-  <param name="base_watchdog_timeout" value="0.2"/>
+  <param name="base_watchdog_timeout" value="0.5"/>
 </node>
 
         <!--  ************** Navigation ***************  -->
@@ -41,7 +41,6 @@
 	<node pkg="amcl" type="amcl" name="amcl" output="screen">
                 <rosparam file="$(find teb_navigation_stage)/cfg/amcl_params.yaml" command="load" />
 
-                <param name="scan"                      value="scan"/>
                 <param name="initial_pose_x"            value="-32.0"/>
                 <param name="initial_pose_y"            value="-32.0"/>
                 <param name="initial_pose_a"            value="0"/>

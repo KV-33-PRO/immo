@@ -52,45 +52,6 @@ void jointStatesCallback(const sensor_msgs::JointState& msg)
         prev_time_init = true;
         ROS_INFO("Rudder: %0.2f; V: %0.2f; S: %0.2f; X: %0.2f; Y: %0.2f; Th: %0.2f;", rudder_angle, linear_speed, linear_offset, x, y, th);
     }
-
-
-        /*
-        double dt = (msg.header.stamp - prev_time).toSec();
-        if(dt < 10 && dt > 0) {
-            angular = 0;
-            dist = 0;
-            speed = 0;
-            for(int i = 0; i < msg.name.size(); i++){
-                if(msg.name[i].compare("left_wheel") == 0 & msg.name[i+1].compare("right_wheel") == 0) {
-                    speed = ((msg.velocity[i]+msg.velocity[i+1])/2)*(d/2);
-                    dist = speed * dt;
-                    i++;
-                } else if(msg.name[i].compare("rudder") == 0) {
-                    angular = msg.position[i];  //радиан
-                }
-            }
-
-            double delta_th;
-            if(angular != 0) {
-                delta_th = dist/(aw/tan(angular));
-            } else {
-                delta_th = 0;
-            }
-
-            double delta_x = dist * cos(th + delta_th/2);
-            double delta_y = dist * sin(th + delta_th/2);
-
-            x += delta_x;
-            y += delta_y;
-            th += delta_th;
-
-            vx = delta_x/dt;
-            vy = delta_y/dt;
-            vth = delta_th/dt;
-            ROS_INFO("Angular: %0.2f; Velocity: %0.2f; Time (dt): %0.4f; X: %0.2f; Y: %0.2f; Th: %0.2f", angular, dist, dt, x, y, th);
-        }
-        */
-
 }
 
 int main(int argc, char** argv){
@@ -150,24 +111,6 @@ int main(int argc, char** argv){
         odom_pub.publish(odom);
     }
 
-    /*
-    geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(th);
-    nav_msgs::Odometry odom;
-
-    odom.header.stamp = ros::Time::now();
-    odom.header.frame_id = "odom";
-    odom.pose.pose.position.x = x;
-    odom.pose.pose.position.y = y;
-    odom.pose.pose.position.z = 0.0;
-    odom.pose.pose.orientation = odom_quat;
-
-    odom.child_frame_id = "base_link";
-    odom.twist.twist.linear.x = vx;
-    odom.twist.twist.linear.y = vy;
-    odom.twist.twist.angular.z = vth;
-
-    pub.publish(odom);
-    */
     r.sleep();
   }
   return 0;

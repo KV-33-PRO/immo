@@ -2,8 +2,8 @@ define laser ranger
 (
   sensor
   (
-    range_max 6.5
-    fov 271
+    range_max 3.5
+    fov 65
     samples 1081
   )
   # generic model properties
@@ -21,7 +21,7 @@ define carlike_robot position
 (
   pose [ 0.0 0.0 0.0 0.0 ]
 
-  odom_error [0.03 0.03 999999 999999 999999 0.02]
+  odom_error [0.04 0.04 999999 999999 999999 0.02]
 
   size [ 0.6 0.35 0.15 ] # this models the footprint (rectangular), but shifted such that the bottom-left corner is in [0,0]. The center of rotation now here at [0.3, 0.175, 0.2]
   # correct center of rotation:
