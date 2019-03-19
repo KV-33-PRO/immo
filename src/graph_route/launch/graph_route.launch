@@ -1,0 +1,29 @@
+<launch>
+  <arg name="pose_x" default="7.5"/>
+  <arg name="pose_y" default="31.3"/>
+  <arg name="pose_th" default="0.0"/>
+  <node pkg="map_server" type="map_server" name="map_server" args="$(find graph_route)/maps/map.yaml"/>
+  <node pkg="odometry" type="odometry_node" name="odometry_node" output="screen">
+    <param name="initial_x" value="$(arg pose_x)"/>
+    <param name="initial_y" value="$(arg pose_y)"/>
+    <param name="initial_th" value="$(arg pose_th)"/>
+    <param name="max_amcl_dist" value="0.1"/>
+    <param name="max_amcl_yaw"  value="0.1"/>
+  </node>
+<!--
+  <node pkg="amcl" type="amcl" name="amcl" output="screen">
+      <rosparam file="$(find graph_route)/config/amcl_params.yaml" command="load" />
+      <param name="initial_pose_x" value="$(arg pose_x)"/>
+      <param name="initial_pose_y" value="$(arg pose_y)"/>
+      <param name="initial_pose_a" value="$(arg pose_th)"/>
+  </node>
+-->
+  <node pkg="tf" type="static_transform_publisher" name="base_laser_link" args="-0.18 0.0 0.0 0.0 0.0 0.0 /base_link /base_laser_link 50" />
+  <node pkg="tf" type="static_transform_publisher" name="odom_to_map" args="0 0 0.151 0 0 0 1.0 map odom 100" />
+  <node pkg="graph_route" type="graph_route_node" name="graph_route_node" output="screen">
+    <rosparam file="$(find graph_route)/config/graph.yaml" command="load" />
+  </node>
+<!--
+  <node pkg="immo_planer" type="immo_planer_node" name="immo_planer_node" output="screen"/>
+-->
+</launch>

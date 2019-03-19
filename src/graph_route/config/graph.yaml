@@ -1,0 +1,181 @@
+max_covariance: 0.2
+finish: 22
+
+node0:
+    x: 7.5
+    y: 31.3
+
+node1:
+    x: 8.5
+    y: 31.3
+
+node2:
+    x: 9.0
+    y: 30.5
+
+node3:
+    x: 9.0
+    y: 29.0
+
+node4:
+    x: 9.0
+    y: 28.5
+
+node5:
+    x: 10.7
+    y: 31.3
+
+node6:
+    x: 11.7
+    y: 30.5
+
+node7:
+    x: 11.7
+    y: 29.0
+
+node8:
+    x: 10.7
+    y: 28.3
+
+node9:
+    x: 9.9
+    y: 28.3
+
+node10:
+    x: 9.7
+    y: 29.0
+
+node11:
+    x: 9.7
+    y: 30.5
+
+node12:
+    x: 9.0
+    y: 27.4
+
+node13:
+    x: 10.7
+    y: 27.7
+
+node14:
+    x: 11.4
+    y: 27.7
+
+node15:
+    x: 12.3
+    y: 29.0
+
+node16:
+    x: 12.3
+    y: 30.5
+
+node17:
+    x: 11.4
+    y: 32
+
+node18:
+    x: 10.2
+    y: 32
+
+node19:
+    x: 9.4
+    y: 31.6
+
+node20:
+    x: 9.0
+    y: 26.5
+
+node21:
+    x: 9.0
+    y: 25.6
+
+node22:
+    x: 10.2
+    y: 25.0
+
+
+link0_1:
+    enabled: 1
+
+link1_2:
+    enabled: 1
+
+link1_5:
+    enabled: 1
+
+link2_3:
+    enabled: 1
+
+link3_4:
+    enabled: 1
+
+link5_6:
+    enabled: 1
+
+link6_7:
+    enabled: 1
+
+link7_8:
+    enabled: 1
+
+link8_9:
+    enabled: 1
+
+link8_10:
+    enabled: 1
+
+link9_10:
+    enabled: 0
+
+link10_11:
+    enabled: 1
+
+link11_5:
+    enabled: 1
+
+link9_12:
+    enabled: 1
+
+link4_12:
+    enabled: 1
+
+link4_13:
+    enabled: 1
+
+link13_14:
+    enabled: 1
+
+link14_15:
+    enabled: 1
+
+link15_16:
+    enabled: 1
+
+link16_17:
+    enabled: 1
+
+link17_18:
+    enabled: 1
+
+link18_19:
+    enabled: 1
+
+link19_2:
+    enabled: 1
+
+link12_20:
+    enabled: 1
+
+link20_21:
+    enabled: 1
+
+link21_22:
+    enabled: 1
+
+cp1:
+  :x: 8.45
+  :y: 30.7
+
+cp2:
+  x: 10.4
+  y: 30.7

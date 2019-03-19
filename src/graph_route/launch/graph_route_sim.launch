@@ -1,0 +1,7 @@
+<launch>
+  <node pkg="driver_sim" type="driver_sim_node" name="driver_sim_node" output="screen"/>
+  <node pkg="light_scan_sim" type="light_scan_sim_node" name="light_scan_sim" output="screen">
+    <rosparam file="$(find graph_route)/config/light_scan_sim.yaml" command="load" />
+  </node>
+  <include file="$(find graph_route)/launch/graph_route.launch"/>
+</launch>

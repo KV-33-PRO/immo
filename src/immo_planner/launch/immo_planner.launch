@@ -1,10 +1,10 @@
 <launch>
+<!--
 <node pkg="odometry" type="odometry_node" name="odometry_node" output="screen">
 <node pkg="kostyl" type="kostyl_node" name="kostyl_node" output="screen">
-<!--
    <param name="flasher_lamps" value="0"/>
    <param name="position_lamps" value="1"/>
    <param name="head_lamps" value="2"/>
--->
 </node>
+-->
 </launch>

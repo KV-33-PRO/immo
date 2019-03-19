@@ -3,11 +3,12 @@
 #include <geometry_msgs/Twist.h>
 #include <sensor_msgs/JointState.h>
 #include <sensor_msgs/BatteryState.h>
+#include <std_msgs/Bool.h>
 
 //#include <LedControl.h>
 //#include <Battery.h>
 
-#define RATE_MS                   20       // задержка для публикации в топик
+#define RATE_MS                   50       // задержка для публикации в топик
 #define RATE_MS_PARAMS            1000     // задержка для обновления параметров
 #define TIME_TO_LIVE_MS           1000     // задержка для остановки движения при отсутствии сообщений в топике cmd_vel
 #define RATE_MS_DYNAMIXEL         50       // задержка управления рулем
@@ -33,6 +34,8 @@
 #define DIRECTION_MOTOR_REAR      PA4      // выход с мотора (для направления движения назад)
 #define MOTOR_PIN_1               PB8      // выход на драйвер мотора 1
 #define MOTOR_PIN_2               PB9      // выход на драйвер мотора 2
+#define BUTTON_PIN                PB4      // кнопка старта
+
 
 #define BAT_BALANCE_PIN_1         PA0      // вход для балансового порта батареи 1
 #define BAT_BALANCE_PIN_2         PA1      // вход для балансового порта батареи 2
@@ -87,8 +90,10 @@ void drive_cb(const geometry_msgs::Twist& cmd_vel) {
 }
 
 sensor_msgs::JointState state_msg;
+std_msgs::Bool btn_msg;
 
 ros::Publisher state_pub("joint_states", &state_msg);                    //инициализация издателя топика "joint_states"
+ros::Publisher btn_pub("robot_button", &btn_msg);                      //инициализация издателя топика "robot_button"
 ros::Subscriber<geometry_msgs::Twist> drive_sub("cmd_vel", drive_cb);    //инициализация подписчика на топик "cmd_vel"
 
 void setup() {
@@ -96,6 +101,8 @@ void setup() {
   pinMode(MOTOR_PIN_2, OUTPUT);
   pinMode(DIRECTION_MOTOR_FRONT, INPUT);
   pinMode(DIRECTION_MOTOR_REAR, INPUT);
+  pinMode(BUTTON_PIN, INPUT);
+  
   pinMode(LED_BUILTIN, OUTPUT); 
   attachInterrupt(ENCODER_LEFT_PIN, doEncoderLeft, CHANGE);      //инициализация прерываний для энкодеров
   attachInterrupt(ENCODER_RIGHT_PIN, doEncoderRight, CHANGE);
@@ -154,10 +161,10 @@ void update_motors() {
 
   if(millis() - last_dynamixel_ms > RATE_MS_DYNAMIXEL)
   {
-  last_dynamixel_ms = millis();
-  angular = angular2dynamixel(cmd_angular);  //выполняем расчет значения для сервомотора
-  Dynamixel.move(DYNAMIXEL_ID, angular);     //выполняем поворот динамикселя на нужный угол
-  state_pos[2] = dynamixel2angular(Dynamixel.readPosition(DYNAMIXEL_ID)); //Получаем значение положения руля
+    last_dynamixel_ms = millis();
+    angular = angular2dynamixel(cmd_angular);  //выполняем расчет значения для сервомотора
+    Dynamixel.move(DYNAMIXEL_ID, angular);     //выполняем поворот динамикселя на нужный угол
+    state_pos[2] = dynamixel2angular(Dynamixel.readPosition(DYNAMIXEL_ID)); //Получаем значение положения руля
   }
 }
 
@@ -181,7 +188,7 @@ void loop() {
 
     state_msg.header.stamp = nh.now();     //фиксируем время сообщения
 
-
+    /*
     //DEBUG INFO
     String str = "T: " + String(millis()) + " L: " + String(state_vel[0]) 
               + " R: " + String(state_vel[1]) 
@@ -200,11 +207,14 @@ void loop() {
     int str_len = str.length() + 1;
     char char_array[str_len];
     str.toCharArray(char_array, str_len);
-    //Serial.println(char_array);
+    Serial.println(char_array);
     nh.logwarn(char_array);
-
+    */
     state_pub.publish(&state_msg);      //публикуем сообщение в топик
-  
+    
+    btn_msg.data = digitalRead(BUTTON_PIN);
+    btn_pub.publish(&btn_msg);      
+    
     //battery.publicBatteryInfo();
     //led.indication();
   }
