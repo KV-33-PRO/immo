@@ -2,6 +2,8 @@
   <arg name="nav_type" default="0"/>   <!-- 0-off 1-scan, 2-nav -->
   <arg name="odom" default="0"/>  <!-- 1-on, 2-off -->
   <arg name="led" default="0"/>  <!-- 1-on, 2-off -->
+  <arg name="cam_road" default="1"/>  <!-- 1-on, 2-off -->
+  <arg name="cam_sign" default="0"/>  <!-- 1-on, 2-off -->
 
 
   <!--Передача параметров ПИД регулятора-->
@@ -37,5 +39,28 @@
   <group if="$(eval arg('led') == 1)">
      <!--Запуск управления световой индикацией-->
      <include file="$(find led_control)/launch/led_control.launch" />
+  </group>
+
+      <!--Запуск камер-->
+  <group if="$(eval arg('cam_road') == 1)">
+     <node name="cam_road" pkg="usb_cam" type="usb_cam_node" respawn="true" output="screen" >
+        <param name="video_device" value="/dev/v4l/by-id/usb-046d_Logitech_Webcam_C930e_015FECDE-video-index0" />
+        <param name="image_width" value="640" />
+        <param name="image_height" value="480" />
+        <param name="pixel_format" value="yuyv" />
+        <param name="camera_frame_id" value="cam_road" />
+        <param name="io_method" value="mmap"/>
+     </node>
+  </group>
+
+  <group if="$(eval arg('cam_sign') == 1)">
+     <node name="cam_sign" pkg="usb_cam" type="usb_cam_node" respawn="true" output="screen" >
+        <param name="video_device" value="/dev/v4l/by-id/usb-046d_081d_11B3DEC0-video-index0" />
+        <param name="image_width" value="640" />
+        <param name="image_height" value="480" />
+        <param name="pixel_format" value="yuyv" />
+        <param name="camera_frame_id" value="cam_sign" />
+        <param name="io_method" value="mmap"/>
+     </node>
   </group>
 </launch>
