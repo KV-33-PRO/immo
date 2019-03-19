@@ -13,7 +13,7 @@
     <param name="rudder_k"  value="0.96"/>
   </node>
   <node pkg="amcl" type="amcl" name="amcl" output="screen">
-      <rosparam file="$(find graph_route)/config/amcl_params.yaml" command="load" />
+      <rosparam file="src/graph_route/config/amcl_params.yaml" command="load" />
       <param name="initial_pose_x" value="$(arg pose_x)"/>
       <param name="initial_pose_y" value="$(arg pose_y)"/>
       <param name="initial_pose_a" value="$(arg pose_th)"/>
