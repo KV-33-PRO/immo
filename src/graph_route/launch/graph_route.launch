@@ -12,20 +12,18 @@
     <param name="wheel_d"  value="0.143"/>
     <param name="rudder_k"  value="0.96"/>
   </node>
-<!--
   <node pkg="amcl" type="amcl" name="amcl" output="screen">
       <rosparam file="$(find graph_route)/config/amcl_params.yaml" command="load" />
       <param name="initial_pose_x" value="$(arg pose_x)"/>
       <param name="initial_pose_y" value="$(arg pose_y)"/>
       <param name="initial_pose_a" value="$(arg pose_th)"/>
   </node>
--->
   <node pkg="tf" type="static_transform_publisher" name="base_laser_link" args="-0.18 0.0 0.0 0.0 0.0 0.0 /base_link /base_laser_link 50" />
   <node pkg="tf" type="static_transform_publisher" name="odom_to_map" args="0 0 0.151 0 0 0 1.0 map odom 100" />
+  <!--
   <node pkg="graph_route" type="graph_route_node" name="graph_route_node" output="screen">
     <rosparam file="$(find graph_route)/config/graph_hotel.yaml" command="load" />
   </node>
-<!--
   <node pkg="immo_planner" type="immo_planner_node" name="immo_planner_node" output="screen">
     <param name="max_rudder"  value="0.4"/>
     <param name="min_speed"  value="0.4"/>
