@@ -8,8 +8,9 @@
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include "odometry/SetPose.h"
 
-double aw  = 0.333;   // межосевое расстояние (в метрах)
-double d = 0.151;     // диаметр колеса (в метрах)
+double base_l  = 0.333;  // межосевое расстояние (в метрах)
+double wheel_d = 0.151;  // диаметр колеса (в метрах)
+double rudder_k = 1;     // коррекция руля
 
 double x  = 0.0;
 double y  = 0.0;
@@ -76,20 +77,19 @@ void amclCallback(const geometry_msgs::PoseWithCovarianceStamped &msg)
 
 void jointStatesCallback(const sensor_msgs::JointState &msg)
 {
-    if(msg.name.size() == 3 && msg.name[0].compare("left_wheel") == 0 && msg.name[1].compare("right_wheel") == 0 && msg.name[2].compare("rudder") == 0) {
+    if(msg.name.size() >= 3 && msg.name[0].compare("left_wheel") == 0 && msg.name[1].compare("right_wheel") == 0 && msg.name[2].compare("rudder") == 0) {
         if(prev_time_init) {
-            linear_speed = ((msg.velocity[0] + msg.velocity[1]) / 2) * (d / 2);
-            linear_offset = ((msg.position[0] + msg.position[1]) / 2) * (d / 2);
-            rudder_angle = msg.position[2];
-            vth = linear_speed * tan(rudder_angle) / aw;
+            linear_speed = ((msg.velocity[0] + msg.velocity[1]) / 2) * (wheel_d / 2);
+            linear_offset = ((msg.position[0] + msg.position[1]) / 2) * (wheel_d / 2);
+            rudder_angle = msg.position[2] * rudder_k;
+            vth = linear_speed * tan(rudder_angle) / base_l;
             ros::Duration dt = msg.header.stamp - prev_time;
             double x_dot = linear_speed * cos(th);
             double y_dot = linear_speed * sin(th);
-            double e = (linear_speed != 0.0) ? rand_error : 0.0;
+
             x += x_dot * dt.toSec();
             y += y_dot * dt.toSec();
-            th += vth * dt.toSec() + fRand(-e, e);
-
+            th += vth * dt.toSec();
         }
         prev_time = msg.header.stamp;
         prev_time_init = true;
@@ -118,13 +118,19 @@ int main(int argc, char** argv){
   pn.param("odom_frame_id", odom_frame, std::string("odom"));
   pn.param("base_frame_id", base_frame, std::string("base_link"));
 
+  pn.param("base_l", base_l, base_l);
+  pn.param("wheel_d", wheel_d, wheel_d);
+  pn.param("rudder_k", rudder_k, rudder_k);
+
   ros::NodeHandle n;
   ros::Subscriber sub = n.subscribe(states_topic, 10, jointStatesCallback);
+  /*
   ros::Subscriber amcl_sub;
   if(amcl_topic.length() > 0){
       amcl_sub = n.subscribe(amcl_topic, 10, amclCallback);
       ROS_INFO("AMCL subscriber created");
   }
+  */
   ros::Publisher odom_pub = n.advertise<nav_msgs::Odometry>(odom_topic, 10);
   ros::ServiceServer service = n.advertiseService("odometry_set_pose", setPoseHandler);
 

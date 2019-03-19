@@ -9,6 +9,9 @@
     <param name="initial_th" value="$(arg pose_th)"/>
     <param name="max_amcl_dist" value="0.1"/>
     <param name="max_amcl_yaw"  value="0.1"/>
+    <param name="base_l"  value="0.333"/>
+    <param name="wheel_d"  value="0.151"/>
+    <param name="rudder_k"  value="1"/>
   </node>
 <!--
   <node pkg="amcl" type="amcl" name="amcl" output="screen">
