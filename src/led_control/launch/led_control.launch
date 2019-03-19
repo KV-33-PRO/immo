@@ -1,5 +1,5 @@
 <launch>
-   <node pkg="led_control" type="led_control_node" name="led_control_node" output="screen">
+   <node pkg="led_control" type="led_control_node" name="led_control_node" respawn="true" output="screen">
       <param name="flasher_lamps" value="0"/>         <!-- 0 - OFF, 1 - ON-->
       <param name="position_lamps" value="1"/>        <!-- 0 - OFF, 1 - ON-->
       <param name="head_lamps" value="2"/>            <!-- 0 - OFF, 1 - DIPPED_BEAM, 2 - HIGH_BEAM-->
