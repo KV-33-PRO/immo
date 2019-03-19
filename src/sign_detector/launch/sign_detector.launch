@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="sign_detector" type="sign_detector" name="sign_detector"  output="screen">
+  </node>
+</launch>

@@ -1,0 +1,4 @@
+<launch>
+  <include file="$(find sign_reciver)/launch/sign_reciver.launch"/>
+  <include file="$(find sign_detector)/launch/sign_detector.launch"/>
+</launch>

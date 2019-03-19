@@ -1,0 +1,17 @@
+#!/usr/bin/python
+import rospy
+from std_msgs.msg import String
+
+def Callback_sign(msg):
+    sign=msg.data
+    print(sign)
+
+def listener():
+    rospy.init_node("sign_reciver")
+    rate = rospy.Rate(10)
+    sub = rospy.Subscriber('/detector/sign',String,Callback_sign)
+    while 1:
+        rate.sleep()
+
+if __name__ == '__main__':
+    listener()
