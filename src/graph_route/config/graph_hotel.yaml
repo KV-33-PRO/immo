@@ -1,0 +1,45 @@
+max_covariance: 0.2
+finish: 3
+
+node0:
+    x: 7.8
+    y: 8.0
+    m1: 0
+    m2: 2
+
+node1:
+    x: 10.4
+    y: 8.13
+
+node2:
+    x: 11.3
+    y: 9.0
+
+node3:
+    x: 11.3
+    y: 15
+
+marker0:
+    x: 8.3
+    y: 7.55
+
+marker1:
+    x: 7.85
+    y: 8.4
+
+marker2:
+    x: 7.8
+    y: 7.6
+
+link0_1:
+    enabled: 1
+
+link1_2:
+    enabled: 1
+
+link2_3:
+    enabled: 1
+
+link3_4:
+    enabled: 1
+

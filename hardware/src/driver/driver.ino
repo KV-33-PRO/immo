@@ -2,7 +2,7 @@
 #include <ros.h>
 #include <geometry_msgs/Twist.h>
 #include <sensor_msgs/JointState.h>
-#include <sensor_msgs/BatteryState.h>
+//#include <sensor_msgs/BatteryState.h>
 #include <std_msgs/Bool.h>
 
 //#include <LedControl.h>
@@ -36,7 +36,6 @@
 #define MOTOR_PIN_2               PB9      // выход на драйвер мотора 2
 #define BUTTON_PIN                PB4      // кнопка старта
 
-
 #define BAT_BALANCE_PIN_1         PA0      // вход для балансового порта батареи 1
 #define BAT_BALANCE_PIN_2         PA1      // вход для балансового порта батареи 2
 #define BAT_BALANCE_PIN_3         PA2      // вход для балансового порта батареи 3
@@ -50,6 +49,7 @@ char *state_names[NUM_JOINTS] = {"left_wheel", "right_wheel", "rudder"};
 float state_pos[NUM_JOINTS] = {0, 0, 0};
 float state_vel[NUM_JOINTS] = {0, 0, 0};
 float state_eff[NUM_JOINTS] = {0, 0, 0};
+
 unsigned long last_ms;
 unsigned long last_ms_params;
 unsigned long last_msgs_cmd_vel_ms;
@@ -135,8 +135,9 @@ void setup() {
   }
     
   nh.subscribe(drive_sub);
-  
   nh.advertise(state_pub);
+  nh.advertise(btn_pub);
+  
   state_msg.header.frame_id =  "/driver_states";
   state_msg.name_length = NUM_JOINTS;
   state_msg.velocity_length = NUM_JOINTS;

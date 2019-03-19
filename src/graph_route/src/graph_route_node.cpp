@@ -1,5 +1,6 @@
 #include "ros/ros.h"
 #include <math.h>
+#include <cmath>
 #include <boost/lexical_cast.hpp>
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/PoseStamped.h>
@@ -26,16 +27,20 @@ int finish_position = -1;
 double max_covariance = 0;
 
 std::string odom_topic = "odom";
+std::string scan_topic = "scan";
 std::string graph_topic = "graph";
 std::string pose_topic = "target_pose";
 std::string pose_frame_id = "odom";
 
-enum GraphNodeKind {NONE, NODE, START, FINISH};
+enum GraphNodeKind {NONE, NODE, MARKER};
 
 struct GraphNode {
     GraphNodeKind kind;
     double x;
     double y;
+    int m1;
+    int m2;
+    int m3;
 };
 
 struct GraphLink
@@ -48,6 +53,7 @@ struct GraphLink
 struct Graph {
     GraphNode nodes[GRAPH_MAX];
     GraphLink links[GRAPH_MAX];
+    GraphNode markers[GRAPH_MAX];
     uint8_t map[GRAPH_MAX][GRAPH_MAX];
 };
 
@@ -171,12 +177,28 @@ void initGraph(ros::NodeHandle &nh) {
     int max_node = 0;
     for(int i = 0; i < GRAPH_MAX; i++){
         graph.nodes[i].kind = NONE;
+        graph.nodes[i].m1 = -1;
+        graph.nodes[i].m2 = -1;
+        graph.nodes[i].m3 = -1;
         std::stringstream ss;
         ss << "node" << i << "/";
         if(nh.getParam(ss.str() + "x", graph.nodes[i].x) &&
            nh.getParam(ss.str() + "y", graph.nodes[i].y)) {
             graph.nodes[i].kind = NODE;
             max_node = i;
+            nh.getParam(ss.str() + "m1", graph.nodes[i].m1);
+            nh.getParam(ss.str() + "m2", graph.nodes[i].m2);
+            nh.getParam(ss.str() + "m3", graph.nodes[i].m3);
+        }
+    }
+    for(int i = 0; i < GRAPH_MAX; i++){
+        graph.markers[i].kind = NONE;
+        std::stringstream ss;
+        ss << "marker" << i << "/";
+        if(nh.getParam(ss.str() + "x", graph.markers[i].x) &&
+           nh.getParam(ss.str() + "y", graph.markers[i].y)) {
+            ROS_INFO("%s", ss.str().c_str());
+            graph.markers[i].kind = MARKER;
         }
     }
     for(int i = 0; i < GRAPH_MAX; i++){
@@ -210,13 +232,11 @@ void initGraph(ros::NodeHandle &nh) {
     int z;
     if(nh.getParam("start", z)) {
         if(z >= -1 && z < GRAPH_MAX && graph.nodes[z].kind != NONE)  {
-            graph.nodes[z].kind = START;
             current_position = z;
         }
     }
     if(nh.getParam("finish", z)) {
         if(z >= -1 && z < GRAPH_MAX && graph.nodes[z].kind != NONE)  {
-            graph.nodes[z].kind = FINISH;
             finish_position = z;
         }
     }
@@ -234,34 +254,36 @@ void drawGraph(ros::Publisher &pub) {
 
     visualization_msgs::MarkerArray arr;
     visualization_msgs::Marker marker;
+    marker.id = 0;
     for(int i = 0; i < GRAPH_MAX; i++) {
         if(graph.nodes[i].kind != NONE) {
-            marker.id = i;
+            marker.id++;
             marker.header.frame_id = "map";
             marker.header.stamp = ros::Time::now();
             marker.ns = "node";
             marker.type = marker.SPHERE;
             marker.pose.position.x = graph.nodes[i].x;
             marker.pose.position.y = graph.nodes[i].y;
+            marker.pose.position.z = 0;
             marker.scale.x = 0.3;
             marker.scale.y = 0.3;
             marker.scale.z = 0.3;
             marker.action = visualization_msgs::Marker::ADD;
             marker.color.a = 0.3;
-            marker.color.r = (graph.nodes[i].kind == START) ? 1 : 0;
-            marker.color.g = (graph.nodes[i].kind == FINISH) ? 1 : 0;
-            marker.color.b = (graph.nodes[i].kind == NODE) ? 1 : 0;
+            marker.color.r = (i == current_position) ? 1 : 0;
+            marker.color.g = (i == finish_position) ? 1 : 0;
+            marker.color.b = (i != current_position && i != finish_position) ? 1 : 0;
             marker.text = "";
             arr.markers.push_back(marker);
 
-            marker.id = GRAPH_MAX+i;
+            marker.id++;
             marker.header.frame_id = "map";
             marker.header.stamp = ros::Time::now();
-            marker.ns = "text";
+            marker.ns = "node";
             marker.type = marker.TEXT_VIEW_FACING;
             marker.pose.position.x = graph.nodes[i].x;
             marker.pose.position.y = graph.nodes[i].y;
-            marker.pose.position.z = 1;
+            marker.pose.position.z = 0;
             marker.scale.x = 0.2;
             marker.scale.y = 0.2;
             marker.scale.z = 0.2;
@@ -276,10 +298,53 @@ void drawGraph(ros::Publisher &pub) {
             arr.markers.push_back(marker);
         }
     }
+    for(int i = 0; i < GRAPH_MAX; i++) {
+        if(graph.markers[i].kind != NONE) {
+            marker.id++;
+            marker.header.frame_id = "map";
+            marker.header.stamp = ros::Time::now();
+            marker.ns = "marker";
+            marker.type = marker.SPHERE;
+            marker.pose.position.x = graph.markers[i].x;
+            marker.pose.position.y = graph.markers[i].y;
+            marker.pose.position.z = 0;
+            marker.scale.x = 0.1;
+            marker.scale.y = 0.1;
+            marker.scale.z = 0.1;
+            marker.action = visualization_msgs::Marker::ADD;
+            marker.color.a = 0.6;
+            marker.color.r = 1;
+            marker.color.g = 1;
+            marker.color.b = 0;
+            marker.text = "";
+            arr.markers.push_back(marker);
+
+            marker.id++;
+            marker.header.frame_id = "map";
+            marker.header.stamp = ros::Time::now();
+            marker.ns = "marker";
+            marker.type = marker.TEXT_VIEW_FACING;
+            marker.pose.position.x = graph.markers[i].x;
+            marker.pose.position.y = graph.markers[i].y;
+            marker.pose.position.z = 0;
+            marker.scale.x = 0.1;
+            marker.scale.y = 0.1;
+            marker.scale.z = 0.1;
+            marker.action = visualization_msgs::Marker::ADD;
+            marker.color.a = 1;
+            marker.color.r = 0;
+            marker.color.g = 0;
+            marker.color.b = 0;
+            std::stringstream ss;
+            ss << i;
+            marker.text = ss.str();
+            arr.markers.push_back(marker);
+        }
+    }
     marker.points.resize(2);
     for(int i = 0; i < GRAPH_MAX; i++) {
         if(graph.links[i].from != graph.links[i].to) {
-            marker.id = 1000 +i;
+            marker.id++;
             marker.header.frame_id = "map";
             marker.header.stamp = ros::Time::now();
             marker.ns = "link";
@@ -309,7 +374,7 @@ void drawGraph(ros::Publisher &pub) {
     if(builder.opt >= 0) {
         Route r = builder.routes[builder.opt];
         for(int i = 0; i < r.count - 1; i++) {
-            marker.id = 2000 +i;
+            marker.id++;
             marker.header.frame_id = "map";
             marker.header.stamp = ros::Time::now();
             marker.ns = "route";
@@ -348,6 +413,11 @@ void odometryCallback(const nav_msgs::Odometry &msg)
     odom = msg;
 }
 
+void laserCallback(const sensor_msgs::LaserScan &msg)
+{
+    scan = msg;
+}
+
 bool process(geometry_msgs::PoseStamped::Ptr cmd);
 
 
@@ -358,11 +428,13 @@ int main(int argc, char **argv)
     ros::NodeHandle ph("~");
 
     ph.param("odom_topic", odom_topic, odom_topic);
+    ph.param("scan_topic", scan_topic, scan_topic);
     ph.param("graph_topic", graph_topic, graph_topic);
     ph.param("pose_topic", pose_topic, pose_topic);
     ph.param("pose_frame_id", pose_frame_id, pose_frame_id);
 
     ros::Subscriber sub1 = nh.subscribe(odom_topic, 10, odometryCallback);
+    ros::Subscriber sub2 = nh.subscribe(scan_topic, 10, laserCallback);
     ros::Publisher cmd_pub = nh.advertise<geometry_msgs::PoseStamped>(pose_topic, 10);
     ros::Publisher arr_pub = nh.advertise<visualization_msgs::MarkerArray>(graph_topic, 1);
 
@@ -378,6 +450,150 @@ int main(int argc, char **argv)
         r.sleep();
     }
     return 0;
+}
+
+double getRange(uint8_t a, uint8_t b) {
+    double sum = 0;
+    for(int i = a - b; i < a + b; i++) {
+        sum += scan.ranges[(i < 0) ? (360 - i) : ((i >= 360) ? i - 360 : i)];
+    }
+    return sum/(2*b + 1);
+}
+
+bool findMarkers(uint8_t id) {
+/*
+    for(int i = 10; i < 350; i += 10) {
+        double l1 = getRange(i-10, 4);
+        double l2 = getRange(i, 4);
+        double l3 = getRange(i+10, 4);
+        double c1 = l1 * cos((i-10) * M_PI/180);
+        double c2 = l2 * cos((i) * M_PI/180);
+        double c3 = l3 * cos((i+10) * M_PI/180);
+        double s1 = l1 * sin((i-10) * M_PI/180);
+        double s2 = l2 * sin((i) * M_PI/180);
+        double s3 = l3 * sin((i+10) * M_PI/180);
+        ROS_INFO("A = %d; L = %0.2f; COS: %0.2f; SIN: %0.2f", i-10, l1, c1, s1);
+        ROS_INFO("A = %d; L = %0.2f; COS: %0.2f; SIN: %0.2f", i, l2, c2, s2);
+        ROS_INFO("A = %d; L = %0.2f; COS: %0.2f; SIN: %0.2f", i+10, l3, c3, s3);
+        ROS_INFO("%0.2f ~ %0.2f; %0.2f ~ %0.2f;", c2, c3 + (c1-c3)/2.0, s2, s3 + (s1-s3)/2.0);
+        ROS_INFO("---------------");
+    }
+*/
+    /*
+    double prev_x = 0;
+    double prev_y = 0;
+    for(int i = 0; i < 360; i += 10) {
+        double r = getRange(i, 4);
+        double dy = r * sin(i*180/M_PI);
+        double dx = r * cos(i*180/M_PI);
+        ROS_INFO("%d - %0.2f, dx: %0.2f, dy: %0.2f", i, r, dx - prev_x, dy - prev_y);
+        prev_x = dx;
+        prev_y = dy;
+    }
+    */
+/*
+    double mx = graph.markers[id].x;
+    double my = graph.markers[id].y;
+    double robot_yaw = tf::getYaw(odom.pose.pose.orientation);
+    double robot_x = odom.pose.pose.position.y;
+    double robot_y = odom.pose.pose.position.x;
+
+    robot_yaw += 0.2;
+
+    double yaw = atan2(my - robot_y, mx - robot_x) - robot_yaw;
+    if(yaw < 0)
+        yaw = 2 * M_PI + yaw;
+    double yaw_deg = yaw*180/M_PI;
+    ROS_INFO("Find marker %0.2f, %0.2f, %0.2f", mx, my, yaw_deg);
+    int delta = 20;
+    int range_from = round(yaw_deg) - delta;
+    int range_to = round(yaw_deg) + delta;
+    ROS_INFO("Scan %d - %d", range_from, range_to);
+    double ppx, ppy;
+
+    for(int i = range_from; i < range_to; i++){
+        double px = robot_x + getRange(i, 3)*cos(robot_yaw + i*M_PI/180);
+        double py = robot_y + getRange(i, 3)*sin(robot_yaw + i*M_PI/180);
+        ROS_INFO("%d - %0.2f, x: %0.2f, y: %0.2f, dx: %0.2f, dy: %0.2f", i, scan.ranges[i],
+                 px,
+                 py,
+                 px - ppx,
+                 py - ppy);
+        ppx = px;
+        ppy = py;
+    }
+    */
+
+}
+
+void correctPosition() {
+    return;
+    ros::Duration dt = ros::Time::now() - scan.header.stamp;
+    if(dt.toSec() > 0.5) return;
+
+    double delta = 0.1;
+    int ray_delta =  20;
+    int ray_width =  10;
+    double marker_l[GRAPH_MAX];
+    double marker_a[GRAPH_MAX];
+    int marker_n = 0;
+    bool in_marker = false;
+    double max_a = 0;
+    double max_d = 0;
+    for(int i = 5; i < 355; i += 3) {
+        double l1 = getRange(i - ray_delta, ray_width);
+        double l2 = getRange(i, ray_width);
+        double l3 = getRange(i + ray_delta, ray_width);
+        double c1 = l1 * cos((i - ray_delta) * M_PI/180);
+        double c2 = l2 * cos((i) * M_PI/180);
+        double c3 = l3 * cos((i + ray_delta) * M_PI/180);
+        double s1 = l1 * sin((i - ray_delta) * M_PI/180);
+        double s2 = l2 * sin((i) * M_PI/180);
+        double s3 = l3 * sin((i + ray_delta) * M_PI/180);
+        double cd = c2 - (c3 + (c1-c3)/2.0);
+        double sd = s2 - (s3 + (s1-s3)/2.0);
+/*
+        ROS_INFO("A = %d; L = %0.2f; COS: %0.2f; SIN: %0.2f", i-10, l1, c1, s1);
+        ROS_INFO("A = %d; L = %0.2f; COS: %0.2f; SIN: %0.2f", i, l2, c2, s2);
+        ROS_INFO("A = %d; L = %0.2f; COS: %0.2f; SIN: %0.2f", i+10, l3, c3, s3);
+        ROS_INFO("%0.2f ~ %0.2f; %0.2f ~ %0.2f;", c2, c3 + (c1-c3)/2.0, s2, s3 + (s1-s3)/2.0);
+        ROS_INFO("%0.2f; %0.2f;", std::abs(cd), std::abs(sd));
+*/
+        if(std::abs(cd) > delta || std::abs(sd) > delta) {
+            in_marker = true;
+            if(max_d < std::abs(cd) + std::abs(sd)) {
+                max_d = std::abs(cd) + std::abs(sd);
+                max_a = i;
+            }
+        } else {
+            if(in_marker) {
+                marker_l[marker_n] = getRange(max_a, 4);
+                marker_a[marker_n] = max_a;
+                ROS_INFO("Found marker L: %0.2f, A: %0.2f", marker_l[marker_n], marker_a[marker_n]);
+                marker_n++;
+                in_marker = false;
+                max_d = 0;
+                max_a = 0;
+            }
+        }
+        //ROS_INFO("---------------");
+    }
+
+
+    //findMarker(graph.nodes[current_position].m1);
+/*
+    uint8_t markers[GRAPH_MAX];
+    uint8_t markers_cnt = 0;
+
+    for(int i = 0; i < GRAPH_MAX; i++) {
+        if(graph.markers[i].kind != NONE) {
+            double dx = odom.pose.pose.position.x - graph.markers[i].x;
+            double dy = odom.pose.pose.position.y - graph.markers[i].y;
+            double d = sqrt(dx*dx + dy*dy);
+
+        }
+    }y
+    */
 }
 
 bool process(geometry_msgs::PoseStamped::Ptr target) {
@@ -416,8 +632,10 @@ bool process(geometry_msgs::PoseStamped::Ptr target) {
         }
     }
 
-    if(!builder.complete || builder.routes[builder.opt].steps[0] != current_position)
+    if(!builder.complete || builder.routes[builder.opt].steps[0] != current_position) {
         builder.build(current_position, finish_position);
+        correctPosition();
+    }
 
     if(builder.complete && builder.routes[builder.opt].count > 1) {
         target->header.stamp = ros::Time::now();

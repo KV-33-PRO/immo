@@ -1,5 +1,8 @@
 <?xml version="1.0"?>
 <launch>
   <node pkg="odometry" type="odometry_node" name="odometry_node" respawn="true" output="screen">
+    <param name="base_l"  value="0.333"/>
+    <param name="wheel_d"  value="0.143"/>
+    <param name="rudder_k"  value="0.93"/>
   </node>
 </launch>

@@ -1,5 +1,6 @@
 #include "ros/ros.h"
 #include <math.h>
+#include <algorithm>
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/PoseStamped.h>
@@ -16,6 +17,9 @@ double d_front = D_MAX;
 double d_back = D_MAX;
 double d_left = D_MAX;
 double d_right = D_MAX;
+double max_rudder = 0.4;
+double min_speed = 0.2;
+double max_speed = 0.4;
 
 void odometryCallback(const nav_msgs::Odometry &msg)
 {
@@ -54,6 +58,10 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "immo_planner_node");
     ros::NodeHandle nh;
     ros::NodeHandle ph("~");
+
+    ph.param("max_rudder", max_rudder, max_rudder);
+    ph.param("min_speed", min_speed, min_speed);
+    ph.param("max_speed", max_speed, max_speed);
 
     ros::Subscriber sub1 = nh.subscribe("odom", 10, odometryCallback);
     ros::Subscriber sub2 = nh.subscribe("scan", 10, laserCallback);
@@ -111,8 +119,14 @@ void process(geometry_msgs::Twist::Ptr cmd) {
         double robot_yaw = tf::getYaw(odom.pose.pose.orientation);
         double yaw = target_yaw - robot_yaw;
         if(abs(yaw) < 1.7) {
+            if(yaw > max_rudder) yaw = max_rudder;
+            if(yaw < -max_rudder) yaw = -max_rudder;
             cmd->angular.z = yaw;
-            cmd->linear.x = 0.3;
+            cmd->linear.x = max_speed * (max_rudder - abs(yaw))/max_rudder;
+            if(cmd->linear.x < min_speed)
+                cmd->linear.x = min_speed;
+        } else {
+            //ROS_WARN("Angle between robot and target is too large (%0.2f)", yaw);
         }
     }
 }

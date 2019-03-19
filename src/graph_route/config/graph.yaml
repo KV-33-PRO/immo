@@ -1,13 +1,15 @@
 max_covariance: 0.2
-finish: 22
+finish: 3
 
 node0:
     x: 7.5
     y: 31.3
 
 node1:
-    x: 8.5
+    x: 8.2
     y: 31.3
+    m1: 0
+    m2: 1
 
 node2:
     x: 9.0
@@ -172,10 +174,19 @@ link20_21:
 link21_22:
     enabled: 1
 
-cp1:
-  :x: 8.45
-  :y: 30.7
+marker0:
+  x: 7.2
+  y: 32.5
 
-cp2:
+marker1:
+  x: 7.3
+  y: 30.75
+
+marker2:
+  x: 8.45
+  y: 30.7
+
+marker3:
   x: 10.4
   y: 30.7
+
