@@ -1,6 +1,10 @@
 image: profest.png
 resolution: 0.002
+<<<<<<< HEAD
+origin: [-0.4, -0.1, 0.0]
+=======
 origin: [0.0, 0.0, 0.0]
+>>>>>>> 4c383a768c3823f3dd26848811643c56b64329d5
 negate: 0
 occupied_thresh: 0.65
 free_thresh: 0.196
