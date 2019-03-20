@@ -6,7 +6,11 @@ node0:
     y: 8.15
 
 node1:
-    x: 9.8
+    x: 10
+    y: 8.1
+
+node2:
+    x: 10.5
     y: 8.1
 
 link0_1:
@@ -15,5 +19,9 @@ link0_1:
     orient_y: 8.6
     orient_k: -1
     orient_a: -0.2
-    dist: 0.45
+    orient_d: 0.6
+    marker_a: 45
 
+link1_2:
+    enabled: 1
+    marker_a: 90

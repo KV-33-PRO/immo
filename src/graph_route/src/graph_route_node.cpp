@@ -66,8 +66,9 @@ struct GraphLink
     double orient_x;
     double orient_y;
     double orient_a;
+    double orient_d;
     int orient_k;
-    double dist;
+    int marker_a;
 };
 
 struct Graph {
@@ -252,13 +253,15 @@ void initGraph(ros::NodeHandle &nh) {
                 graph.links[link].orient_y = 0;
                 graph.links[link].orient_k = 0;
                 graph.links[link].orient_a = 0;
-                graph.links[link].dist = 0;
+                graph.links[link].orient_d = 0;
+                graph.links[link].marker_a = 0;
                 nh.getParam(ss.str() + "orient", graph.links[link].orient);
                 nh.getParam(ss.str() + "orient_x", graph.links[link].orient_x);
                 nh.getParam(ss.str() + "orient_y", graph.links[link].orient_y);
                 nh.getParam(ss.str() + "orient_k", graph.links[link].orient_k);
                 nh.getParam(ss.str() + "orient_a", graph.links[link].orient_a);
-                nh.getParam(ss.str() + "dist", graph.links[link].dist);
+                nh.getParam(ss.str() + "orient_d", graph.links[link].orient_d);
+                nh.getParam(ss.str() + "marker_a", graph.links[link].marker_a);
                 double dx = graph.nodes[graph.links[link].from].x - graph.nodes[graph.links[link].to].x;
                 double dy = graph.nodes[graph.links[link].from].y - graph.nodes[graph.links[link].to].y;
                 graph.links[link].len = sqrt(dx*dx + dy*dy);
@@ -577,6 +580,30 @@ bool checkStarted() {
     return  true;
 }
 
+
+
+bool checkMarker(int dir) {
+    double delta = 0.5;
+    int ray_delta =  5;
+    int ray_from = dir - ray_delta;
+    int ray_to = dir + ray_delta;
+    double l1 = scan.ranges[ray_from];
+    double l2 = scan.ranges[dir];
+    double l3 = scan.ranges[ray_to];
+    double c1 = l1 * cos(ray_from * M_PI/180);
+    double c2 = l2 * cos(dir * M_PI/180);
+    double c3 = l3 * cos(ray_to * M_PI/180);
+    double s1 = l1 * sin(ray_from * M_PI/180);
+    double s2 = l2 * sin(dir * M_PI/180);
+    double s3 = l3 * sin(ray_to * M_PI/180);
+    double cd = c2 - (c3 + (c1-c3)/2.0);
+    double sd = s2 - (s3 + (s1-s3)/2.0);
+    if(std::abs(cd) > delta || std::abs(sd) > delta) {
+        return true;
+    }
+    return false;
+}
+
 bool checkWall(double &wall_a, double &wall_d, int dir) {
     double delta = 0.15;
     int ray_delta =  10;
@@ -610,13 +637,13 @@ void createCmd(geometry_msgs::Twist::Ptr cmd) {
         GraphNode node1 = graph.nodes[builder.routes[builder.opt].steps[1]];
         GraphLink link = graph.links[graph.map[builder.routes[builder.opt].steps[0]][builder.routes[builder.opt].steps[1]]];
         double yaw = 0;
-        if(link.orient > 0 && link.dist > 0) {
+        if(link.orient > 0 && link.orient_d > 0) {
             double wall_a, wall_d;
             if(checkWall(wall_a, wall_d, link.orient)) {
                 ROS_INFO("Wall at %d detected. A: %0.2f, D: %0.2f", link.orient, wall_a, wall_d);
-                if(std::abs(wall_d - link.dist) > 0.1 * link.dist) {
+                if(std::abs(wall_d - link.orient_d) > 0.1 * link.orient_d) {
                     ROS_INFO("Control by wall distance %0.2f", wall_d);
-                    yaw = 0.7 * ((180 - link.orient) > 0 ? 1 : -1) * (wall_d - link.dist)/link.dist;
+                    yaw = 0.7 * ((180 - link.orient) > 0 ? 1 : -1) * (wall_d - link.orient_d)/link.orient_d;
                 } else {
                     ROS_INFO("Control by wall angle %0.2f", wall_a);
                     yaw = -wall_a * 1.5;
@@ -673,12 +700,23 @@ bool process(geometry_msgs::PoseStamped::Ptr target, geometry_msgs::Twist::Ptr c
     }
 
     if(builder.complete && builder.routes[builder.opt].steps[0] == current_position && builder.routes[builder.opt].count > 1) {
-        double dx = odom.pose.pose.position.x - graph.nodes[builder.routes[builder.opt].steps[1]].x;
-        double dy = odom.pose.pose.position.y - graph.nodes[builder.routes[builder.opt].steps[1]].y;
-        double d = sqrt(dx*dx + dy*dy);
-        if(d <= max_covariance) {
-            GraphLink link = graph.links[graph.map[builder.routes[builder.opt].steps[0]][builder.routes[builder.opt].steps[1]]];
-            if(link.orient > 0 && link.dist > 0 && (link.orient_x > 0 || link.orient_y > 0)) {
+        GraphLink link = graph.links[graph.map[builder.routes[builder.opt].steps[0]][builder.routes[builder.opt].steps[1]]];
+        bool step_finished = false;
+        if(link.marker_a != 0) {
+            checkMarker(link.marker_a);
+            step_finished = true;
+            ROS_INFO("Found marker at %d. Step finished.", link.marker_a);
+        } else {
+            double dx = odom.pose.pose.position.x - graph.nodes[builder.routes[builder.opt].steps[1]].x;
+            double dy = odom.pose.pose.position.y - graph.nodes[builder.routes[builder.opt].steps[1]].y;
+            double d = sqrt(dx*dx + dy*dy);
+            if(d <= max_covariance) {
+                step_finished = true;
+                ROS_INFO("Step finished by odometry data.");
+            }
+        }
+        if(step_finished) {
+            if(link.orient > 0 && link.orient_d > 0 && (link.orient_x > 0 || link.orient_y > 0)) {
                 double wall_a, wall_d;
                 ROS_INFO("Correcting position by wall at %d", link.orient);
                 if(checkWall(wall_a, wall_d, link.orient)) {
