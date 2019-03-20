@@ -5,13 +5,17 @@
 #include <nav_msgs/Odometry.h>
 #include <std_msgs/Bool.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/Pose2D.h>
 #include <sensor_msgs/LaserScan.h>
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <tf/tf.h>
+//#include "odometry/SetPose.h"
 
 nav_msgs::Odometry odom;
 sensor_msgs::LaserScan scan;
+ros::ServiceClient set_pose_client;
+
 #define D_MAX 10
 double d_front = D_MAX;
 double d_back = D_MAX;
@@ -37,7 +41,8 @@ bool started = false;
 std::string odom_topic = "odom";
 std::string scan_topic = "scan";
 std::string graph_topic = "graph";
-std::string pose_topic = "target_pose";
+std::string target_topic = "targetpose";
+std::string pose_topic = "correctpose";
 std::string pose_frame_id = "odom";
 std::string cmd_topic = "cmd_vel";
 
@@ -57,8 +62,12 @@ struct GraphLink
     uint8_t from;
     uint8_t to;
     double  len;
-    double  left;
-    double  right;
+    int  orient;
+    double orient_x;
+    double orient_y;
+    double orient_a;
+    int orient_k;
+    double dist;
 };
 
 struct Graph {
@@ -72,7 +81,7 @@ Graph graph;
 
 struct RouteBuilder;
 struct Route {
-    uint8_t id;
+    int id;
     double len;
     uint8_t count;
     bool complete;
@@ -84,10 +93,10 @@ struct Route {
 };
 
 struct RouteBuilder {
-    uint8_t count;
-    uint8_t opt;
+    int count;
+    int opt;
     bool complete;
-    Route routes[GRAPH_MAX];
+    Route routes[4096];
     void build(uint8_t fromNode, uint8_t toNode);
 };
 
@@ -138,10 +147,16 @@ void Route::add(uint8_t step) {
             len += graph.links[link_id].len;
     }
     steps[count] = step;
+    //ROS_INFO("Graph %d add step %d", id, step);
     count++;
 }
 
 void RouteBuilder::build(uint8_t fromNode, uint8_t toNode) {
+    opt = -1;
+    complete = false;
+    if(fromNode == toNode)
+        return;
+
     ROS_INFO("Building route %d -> %d", fromNode, toNode);
     for(int i = 0; i <  count; i++) {
         routes[i].id = 0;
@@ -173,6 +188,7 @@ void RouteBuilder::build(uint8_t fromNode, uint8_t toNode) {
             min = routes[i].len;
         }
     }
+
     if(id >= 0) {
         opt = id;
         complete = true;
@@ -231,10 +247,18 @@ void initGraph(ros::NodeHandle &nh) {
             if(nh.getParam(ss.str() + "enabled", z) && z > 0) {
                 graph.links[link].from = i;
                 graph.links[link].to = j;
-                graph.links[link].left = 0;
-                graph.links[link].right = 0;
-                nh.getParam(ss.str() + "left", graph.links[link].left);
-                nh.getParam(ss.str() + "right", graph.links[link].right);
+                graph.links[link].orient = 0;
+                graph.links[link].orient_x = 0;
+                graph.links[link].orient_y = 0;
+                graph.links[link].orient_k = 0;
+                graph.links[link].orient_a = 0;
+                graph.links[link].dist = 0;
+                nh.getParam(ss.str() + "orient", graph.links[link].orient);
+                nh.getParam(ss.str() + "orient_x", graph.links[link].orient_x);
+                nh.getParam(ss.str() + "orient_y", graph.links[link].orient_y);
+                nh.getParam(ss.str() + "orient_k", graph.links[link].orient_k);
+                nh.getParam(ss.str() + "orient_a", graph.links[link].orient_a);
+                nh.getParam(ss.str() + "dist", graph.links[link].dist);
                 double dx = graph.nodes[graph.links[link].from].x - graph.nodes[graph.links[link].to].x;
                 double dy = graph.nodes[graph.links[link].from].y - graph.nodes[graph.links[link].to].y;
                 graph.links[link].len = sqrt(dx*dx + dy*dy);
@@ -243,7 +267,7 @@ void initGraph(ros::NodeHandle &nh) {
             }
         }
     }
-
+    ROS_INFO("Route link count: %d", link);
     int z;
     if(nh.getParam("start", z)) {
         if(z >= -1 && z < GRAPH_MAX && graph.nodes[z].kind != NONE)  {
@@ -416,10 +440,6 @@ void drawGraph(ros::Publisher &pub) {
             arr.markers.push_back(marker);
         }
     }
-    std::string odom_topic = "odom";
-    std::string pose_topic = "target_pose";
-    std::string pose_frame_id = "odom";
-
     pub.publish(arr);
 }
 
@@ -436,15 +456,17 @@ void laserCallback(const sensor_msgs::LaserScan &msg)
 void buttonCallback(const std_msgs::Bool &msg)
 {
     if(msg.data && !started) {
+        ROS_INFO("START signal received!");
         started = true;
         start_time = ros::Time::now();
     }
     if(!msg.data && started) {
+        ROS_INFO("STOP signal received!");
         started = false;
     }
 }
 
-bool process(geometry_msgs::PoseStamped::Ptr target, geometry_msgs::Twist::Ptr cmd);
+bool process(geometry_msgs::PoseStamped::Ptr target, geometry_msgs::Twist::Ptr cmd, geometry_msgs::Pose2D::Ptr corr_pose);
 
 
 int main(int argc, char **argv)
@@ -456,6 +478,7 @@ int main(int argc, char **argv)
     ph.param("odom_topic", odom_topic, odom_topic);
     ph.param("scan_topic", scan_topic, scan_topic);
     ph.param("graph_topic", graph_topic, graph_topic);
+    ph.param("target_topic", target_topic, target_topic);
     ph.param("pose_topic", pose_topic, pose_topic);
     ph.param("pose_frame_id", pose_frame_id, pose_frame_id);
     ph.param("cmd_topic", cmd_topic, cmd_topic);
@@ -467,23 +490,35 @@ int main(int argc, char **argv)
     ros::Subscriber sub1 = nh.subscribe(odom_topic, 10, odometryCallback);
     ros::Subscriber sub2 = nh.subscribe(scan_topic, 10, laserCallback);
     ros::Subscriber sub3 = nh.subscribe("robot_button", 10, buttonCallback);
-    ros::Publisher pos_pub = nh.advertise<geometry_msgs::PoseStamped>(pose_topic, 10);
+    ros::Publisher trg_pub = nh.advertise<geometry_msgs::PoseStamped>(target_topic, 10);
+    ros::Publisher pos_pub = nh.advertise<geometry_msgs::Pose2D>(pose_topic, 10);
     ros::Publisher arr_pub = nh.advertise<visualization_msgs::MarkerArray>(graph_topic, 1);
     ros::Publisher cmd_pub = nh.advertise<geometry_msgs::Twist>(cmd_topic, 10);
-
     initGraph(ph);
     ros::Rate r(20);
     geometry_msgs::PoseStamped::Ptr target(new geometry_msgs::PoseStamped);
+    geometry_msgs::Pose2D::Ptr corr_pose(new geometry_msgs::Pose2D);
     geometry_msgs::Twist::Ptr cmd_vel(new geometry_msgs::Twist);
     target->header.frame_id = pose_frame_id;
+    ros::Time correctPoseTime = ros::Time::now();
     while(ros::ok()){
         ros::spinOnce();
         drawGraph(arr_pub);
         cmd_vel->angular.z = 0;
         cmd_vel->linear.x = 0;
-        if(process(target, cmd_vel)) {
-            pos_pub.publish(target);
+        corr_pose->x = 0;
+        corr_pose->y = 0;
+        corr_pose->theta = 0;
+        if(process(target, cmd_vel, corr_pose)) {
+            trg_pub.publish(target);
             cmd_pub.publish(cmd_vel);
+            if(corr_pose->x != 0 || corr_pose->y != 0 || corr_pose->theta != 0){
+                ros::Duration dt = ros::Time::now() - correctPoseTime;
+                if(dt.toSec() > 0.5) {
+                    pos_pub.publish(corr_pose);
+                    correctPoseTime = ros::Time::now();
+                }
+            }
         }
         r.sleep();
     }
@@ -491,65 +526,12 @@ int main(int argc, char **argv)
 }
 
 double getRange(uint8_t a, uint8_t b) {
-    double sum = 0;
+    return scan.ranges[a];
+    double sum = 0.0;
     for(int i = a - b; i < a + b; i++) {
         sum += scan.ranges[(i < 0) ? (360 - i) : ((i >= 360) ? i - 360 : i)];
     }
     return sum/(2*b + 1);
-}
-
-void correctPosition() {
-    return;
-    ros::Duration dt = ros::Time::now() - scan.header.stamp;
-    if(dt.toSec() > 0.5) return;
-
-    double delta = 0.1;
-    int ray_delta =  20;
-    int ray_width =  10;
-    double marker_l[GRAPH_MAX];
-    double marker_a[GRAPH_MAX];
-    int marker_n = 0;
-    bool in_marker = false;
-    double max_a = 0;
-    double max_d = 0;
-    for(int i = 5; i < 355; i += 3) {
-        double l1 = getRange(i - ray_delta, ray_width);
-        double l2 = getRange(i, ray_width);
-        double l3 = getRange(i + ray_delta, ray_width);
-        double c1 = l1 * cos((i - ray_delta) * M_PI/180);
-        double c2 = l2 * cos((i) * M_PI/180);
-        double c3 = l3 * cos((i + ray_delta) * M_PI/180);
-        double s1 = l1 * sin((i - ray_delta) * M_PI/180);
-        double s2 = l2 * sin((i) * M_PI/180);
-        double s3 = l3 * sin((i + ray_delta) * M_PI/180);
-        double cd = c2 - (c3 + (c1-c3)/2.0);
-        double sd = s2 - (s3 + (s1-s3)/2.0);
-/*
-        ROS_INFO("A = %d; L = %0.2f; COS: %0.2f; SIN: %0.2f", i-10, l1, c1, s1);
-        ROS_INFO("A = %d; L = %0.2f; COS: %0.2f; SIN: %0.2f", i, l2, c2, s2);
-        ROS_INFO("A = %d; L = %0.2f; COS: %0.2f; SIN: %0.2f", i+10, l3, c3, s3);
-        ROS_INFO("%0.2f ~ %0.2f; %0.2f ~ %0.2f;", c2, c3 + (c1-c3)/2.0, s2, s3 + (s1-s3)/2.0);
-        ROS_INFO("%0.2f; %0.2f;", std::abs(cd), std::abs(sd));
-*/
-        if(std::abs(cd) > delta || std::abs(sd) > delta) {
-            in_marker = true;
-            if(max_d < std::abs(cd) + std::abs(sd)) {
-                max_d = std::abs(cd) + std::abs(sd);
-                max_a = i;
-            }
-        } else {
-            if(in_marker) {
-                marker_l[marker_n] = getRange(max_a, 4);
-                marker_a[marker_n] = max_a;
-                ROS_INFO("Found marker L: %0.2f, A: %0.2f", marker_l[marker_n], marker_a[marker_n]);
-                marker_n++;
-                in_marker = false;
-                max_d = 0;
-                max_a = 0;
-            }
-        }
-        //ROS_INFO("---------------");
-    }
 }
 
 void getDist(double &d, int f, int t) {
@@ -558,79 +540,112 @@ void getDist(double &d, int f, int t) {
             d = scan.ranges[i];
 }
 
-void createCmd(geometry_msgs::Twist::Ptr cmd) {
-    ros::Duration scan_dt = ros::Time::now() - scan.header.stamp;
-    ros::Duration odom_dt = ros::Time::now() - odom.header.stamp;
-    ros::Duration start_dt = ros::Time::now() - start_time;
-
-    if(start_dt.toSec() > 5 && start_dt.toSec() < 240 && scan_dt.toSec() < 0.1 &&  odom_dt.toSec() < 0.1) {
-        double fr = 10;
-        getDist(fr, 0, 20);
-        getDist(fr, 340, 360);
-        if(fr < min_front){
-            ROS_WARN("Front obstacle detected! D: %0.2f", fr);
-            return;
-        }
-
-        GraphNode node0 = graph.nodes[builder.routes[builder.opt].steps[0]];
-        GraphNode node1 = graph.nodes[builder.routes[builder.opt].steps[1]];
-        GraphLink link = graph.links[graph.map[builder.routes[builder.opt].steps[0]][builder.routes[builder.opt].steps[1]]];
-        double target_yaw = atan2(node1.y - odom.pose.pose.position.y, node1.x - odom.pose.pose.position.x);
-        double robot_yaw = tf::getYaw(odom.pose.pose.orientation);
-        double yaw = target_yaw - robot_yaw;
-        if(link.left > 0) {
-            double p1 = 10;
-            double p2 = 10;
-            double p3 = 10;
-            getDist(p1, 70, 75);
-            getDist(p2, 105, 110);
-            getDist(p3, 87, 93);
-            if(p1 < 10 &&  p2 < 10 && p3 < 10) {
-                double d = (p1 - p2)/(double)link.left;
-                if(p3 < 0.9 * link.left || p3 > 1.1 * link.left) {
-                    yaw = 1.5 * (p3 - link.left);
-                } else if(p3 < 0.95 * link.left || p3 > 1.05 * link.left) {
-                    yaw = 0.7 * (p3 - link.left);
-                } else {
-                    yaw = 2.0 * d;
-                }
-                ROS_INFO("Wall: %0.2f,  %0.2f,  %0.2f", d, p3, yaw);
-            }
-        } else if(link.right > 0) {
-            double p1 = 10;
-            double p2 = 10;
-            double p3 = 10;
-            getDist(p1, 250, 255);
-            getDist(p2, 285, 300);
-            getDist(p3, 267, 273);
-            if(p1 < 10 &&  p2 < 10 && p3 < 10) {
-                double d = (p1 - p2)/(double)link.right;
-                if(p3 < 0.9 * link.right || p3 > 1.1 * link.right) {
-                    yaw = 1.5 * (link.right - p3);
-                } else if(p3 < 0.95 * link.right || p3 > 1.05 * link.right) {
-                    yaw = 0.7 * (link.right - p3);
-                } else {
-                    yaw = 2.0 * d;
-                }
-                ROS_INFO("Wall: %0.2f,  %0.2f,  %0.2f", d, p3, yaw);
-            }
-        }
-        if(std::abs(yaw) < 1.7) {
-            if(yaw > max_rudder) yaw = max_rudder;
-            if(yaw < -max_rudder) yaw = -max_rudder;
-            cmd->angular.z = yaw;
-            cmd->linear.x = max_speed * (max_rudder - abs(yaw))/max_rudder;
-            if(cmd->linear.x < min_speed){
-                cmd->linear.x = min_speed;
-            }
-            //cmd->linear.x = 0;
-        } else {
-            //ROS_WARN("Angle between robot and target is too large (%0.2f)", yaw);
-        }
+bool checkFrontObstacle() {
+    double fr = 10;
+    getDist(fr, 0, 20);
+    getDist(fr, 340, 360);
+    if(fr < min_front){
+        ROS_WARN("Front obstacle detected! D: %0.2f", fr);
+        return false;
+    } else {
+        return true;
     }
 }
 
-bool process(geometry_msgs::PoseStamped::Ptr target, geometry_msgs::Twist::Ptr cmd) {
+bool checkStarted() {
+    ros::Duration scan_dt = ros::Time::now() - scan.header.stamp;
+    ros::Duration odom_dt = ros::Time::now() - odom.header.stamp;
+    ros::Duration start_dt = ros::Time::now() - start_time;
+    if(!started)
+        return false;
+    if(start_dt.toSec() < 5) {
+        ROS_INFO("Wait %0.2f sec.", start_dt.toSec());
+        return false;
+    }
+    if(start_dt.toSec() > 240) {
+        ROS_INFO("Out of time!");
+        return false;
+    }
+    if(scan_dt.toSec() > 0.2) {
+        ROS_WARN("Scan info is too old (%0.2f sec)", scan_dt.toSec());
+        return false;
+    }
+    if(odom_dt.toSec() > 0.2) {
+        ROS_WARN("Odom info is too old (%0.2f sec)", odom_dt.toSec());
+        return false;
+    }
+    return  true;
+}
+
+bool checkWall(double &wall_a, double &wall_d, int dir) {
+    double delta = 0.15;
+    int ray_delta =  10;
+    int ray_from = dir - ray_delta;
+    int ray_to = dir + ray_delta;
+    double l1 = scan.ranges[ray_from];
+    double l2 = scan.ranges[dir];
+    double l3 = scan.ranges[ray_to];
+    double c1 = l1 * cos(ray_from * M_PI/180);
+    double c2 = l2 * cos(dir * M_PI/180);
+    double c3 = l3 * cos(ray_to * M_PI/180);
+    double s1 = l1 * sin(ray_from * M_PI/180);
+    double s2 = l2 * sin(dir * M_PI/180);
+    double s3 = l3 * sin(ray_to * M_PI/180);
+    double cd = c2 - (c3 + (c1-c3)/2.0);
+    double sd = s2 - (s3 + (s1-s3)/2.0);
+    if(std::abs(cd) < delta && std::abs(sd) < delta) {
+        wall_a = -atan((s3 - s1)/(c3 - c1));
+        ray_from = dir - wall_a * 180/M_PI;
+        if(ray_from >= 360) ray_from = ray_from - 360;
+        if(ray_from < 0) ray_from = ray_from + 360;
+        wall_d = scan.ranges[ray_from];
+        return true;
+    }
+    return false;
+}
+
+void createCmd(geometry_msgs::Twist::Ptr cmd) {
+    if(checkStarted() && checkFrontObstacle()) {
+        GraphNode node0 = graph.nodes[builder.routes[builder.opt].steps[0]];
+        GraphNode node1 = graph.nodes[builder.routes[builder.opt].steps[1]];
+        GraphLink link = graph.links[graph.map[builder.routes[builder.opt].steps[0]][builder.routes[builder.opt].steps[1]]];
+        double yaw = 0;
+        if(link.orient > 0 && link.dist > 0) {
+            double wall_a, wall_d;
+            if(checkWall(wall_a, wall_d, link.orient)) {
+                ROS_INFO("Wall at %d detected. A: %0.2f, D: %0.2f", link.orient, wall_a, wall_d);
+                if(std::abs(wall_d - link.dist) > 0.1 * link.dist) {
+                    ROS_INFO("Control by wall distance %0.2f", wall_d);
+                    yaw = 0.7 * ((180 - link.orient) > 0 ? 1 : -1) * (wall_d - link.dist)/link.dist;
+                } else {
+                    ROS_INFO("Control by wall angle %0.2f", wall_a);
+                    yaw = -wall_a * 1.5;
+                }
+            }  else {
+                ROS_WARN("Cannot detect wall at %d deg.", link.orient);
+                return;
+            }
+        } else {
+            double target_yaw = atan2(node1.y - odom.pose.pose.position.y, node1.x - odom.pose.pose.position.x);
+            double robot_yaw = tf::getYaw(odom.pose.pose.orientation);
+            yaw = target_yaw - robot_yaw;
+            if(yaw > M_PI)  yaw = yaw - 2*M_PI;
+            if(yaw < -M_PI) yaw = yaw + 2*M_PI;
+            ROS_INFO("Control by target angle %0.2f", yaw);
+            if(std::abs(yaw) > 1.7) {
+                ROS_WARN("Angle between robot and target is too large (%0.2f)", yaw);
+            }
+        }
+        if(yaw > max_rudder) yaw = max_rudder;
+        if(yaw < -max_rudder) yaw = -max_rudder;
+        cmd->angular.z = yaw;
+        cmd->linear.x = max_speed * (max_rudder - abs(yaw))/max_rudder;
+        cmd->linear.x = (cmd->linear.x < min_speed) ? min_speed : cmd->linear.x;
+        ROS_INFO("Yaw: %0.2f; Speed: %0.2f", yaw, cmd->linear.x);
+    }
+}
+
+bool process(geometry_msgs::PoseStamped::Ptr target, geometry_msgs::Twist::Ptr cmd, geometry_msgs::Pose2D::Ptr corr_pose) {
     if(current_position < 0) {
         ROS_INFO("Find robot current position in graph...");
         double min_d = 1000;
@@ -662,13 +677,43 @@ bool process(geometry_msgs::PoseStamped::Ptr target, geometry_msgs::Twist::Ptr c
         double dy = odom.pose.pose.position.y - graph.nodes[builder.routes[builder.opt].steps[1]].y;
         double d = sqrt(dx*dx + dy*dy);
         if(d <= max_covariance) {
+            GraphLink link = graph.links[graph.map[builder.routes[builder.opt].steps[0]][builder.routes[builder.opt].steps[1]]];
+            if(link.orient > 0 && link.dist > 0 && (link.orient_x > 0 || link.orient_y > 0)) {
+                double wall_a, wall_d;
+                ROS_INFO("Correcting position by wall at %d", link.orient);
+                if(checkWall(wall_a, wall_d, link.orient)) {
+                    ROS_INFO("Wall detected. A: %0.2f, D: %0.2f", wall_a, wall_d);
+                    if(link.orient_x > 0) {
+                        corr_pose->x = link.orient_x + ((double)link.orient_k * wall_d);
+                        corr_pose->y = odom.pose.pose.position.y;
+                        if(link.orient_a != 0) {
+                            corr_pose->theta = link.orient_a + wall_a;
+                        } else {
+                            corr_pose->theta = tf::getYaw(odom.pose.pose.orientation);
+                        }
+                    } else if(link.orient_y > 0) {
+                        corr_pose->y = link.orient_y + ((double)link.orient_k * wall_d);
+                        corr_pose->x = odom.pose.pose.position.x;
+                        if(link.orient_a != 0) {
+                            corr_pose->theta = link.orient_a + wall_a;
+                        } else {
+                            corr_pose->theta = tf::getYaw(odom.pose.pose.orientation);
+                        }
+                    }
+                }
+            }
             current_position = builder.routes[builder.opt].steps[1];
         }
     }
 
     if(!builder.complete || builder.routes[builder.opt].steps[0] != current_position) {
-        builder.build(current_position, finish_position);
-        correctPosition();
+        if(current_position == finish_position) {
+            ROS_INFO("Finished successfully!!!");
+            finish_position = -1;
+            return true;
+        } else {
+            builder.build(current_position, finish_position);
+        }
     }
 
     if(builder.complete && builder.routes[builder.opt].count > 1) {
@@ -680,8 +725,7 @@ bool process(geometry_msgs::PoseStamped::Ptr target, geometry_msgs::Twist::Ptr c
         target->pose.position.y = node1.y;
         double yaw = atan2(node1.y - node0.y, node1.x - node0.x);
         tf::quaternionTFToMsg(tf::createQuaternionFromYaw(yaw), target->pose.orientation);
-        if(started)
-            createCmd(cmd);
+        createCmd(cmd);
         return true;
     }
 

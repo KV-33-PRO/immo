@@ -1,16 +1,16 @@
 max_covariance: 0.2
-finish: 6
+finish: 7
 
 node0:
-    x: 8.0
-    y: 8.0
+    x: 7.8
+    y: 8.1
 
 node1:
     x: 8.4
-    y: 8.05
+    y: 8.1
 
 node2:
-    x: 10.3
+    x: 9.8
     y: 8.15
 
 node3:
@@ -19,13 +19,17 @@ node3:
 
 node4:
     x: 11.3
-    y: 9.2
+    y: 9.0
 
 node5:
     x: 11.3
-    y: 10
+    y: 9.2
 
 node6:
+    x: 11.3
+    y: 12
+
+node7:
     x: 11.3
     y: 15
 
@@ -34,7 +38,11 @@ link0_1:
 
 link1_2:
     enabled: 1
-    left: 0.6
+    orient: 90
+    orient_y: 8.6
+    orient_k: -1
+    orient_a: -0.2
+    dist: 0.45
 
 link2_3:
     enabled: 1
@@ -44,7 +52,24 @@ link3_4:
 
 link4_5:
     enabled: 1
+    orient: 90
+    orient_x: 10.5
+    orient_k: 1
+    orient_a: 1.57
+    dist: 0.8
 
 link5_6:
     enabled: 1
-    right: 1.0
+    orient: 90
+    orient_x: 10.5
+    orient_k: 1
+    orient_a: 1.57
+    dist: 0.8
+
+link6_7:
+    enabled: 1
+    orient: 270
+    orient_x: 12.1
+    orient_k: -1
+    orient_a: 1.57
+    dist: 0.8

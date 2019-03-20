@@ -8,6 +8,7 @@
 //#include <LedControl.h>
 //#include <Battery.h>
 
+
 #define RATE_MS                   50       // задержка для публикации в топик
 #define RATE_MS_PARAMS            1000     // задержка для обновления параметров
 #define TIME_TO_LIVE_MS           1000     // задержка для остановки движения при отсутствии сообщений в топике cmd_vel

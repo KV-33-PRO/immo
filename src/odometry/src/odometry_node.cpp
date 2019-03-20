@@ -46,6 +46,26 @@ double fRand(double fMin, double fMax)
     return fMin + f * (fMax - fMin);
 }
 
+void initialPoseCallback(const geometry_msgs::PoseWithCovarianceStamped &msg)
+{
+    ros::Duration d = ros::Time::now() - msg.header.stamp;
+    if(d.toSec() < 0.2) {
+        ROS_INFO("Odometry correction: X: %0.2f -> %0.2f; Y: %0.2f -> %0.2f; Th: %0.2f -> %0.2f", x, msg.pose.pose.position.x, y, msg.pose.pose.position.y, th, tf::getYaw(msg.pose.pose.orientation));
+        x = msg.pose.pose.position.x;
+        y = msg.pose.pose.position.y;
+        th = tf::getYaw(msg.pose.pose.orientation);
+    }
+}
+
+void correctPoseCallback(const geometry_msgs::Pose2D &msg)
+{
+    ROS_INFO("Odometry correction: X: %0.2f -> %0.2f; Y: %0.2f -> %0.2f; Th: %0.2f -> %0.2f", x, msg.x, y, msg.y, th, msg.theta);
+    x = msg.x;
+    y = msg.y;
+    th = msg.theta;
+}
+
+
 void amclCallback(const geometry_msgs::PoseWithCovarianceStamped &msg)
 {
     return;
@@ -123,7 +143,9 @@ int main(int argc, char** argv){
   pn.param("rudder_k", rudder_k, rudder_k);
 
   ros::NodeHandle n;
-  ros::Subscriber sub = n.subscribe(states_topic, 10, jointStatesCallback);
+  ros::Subscriber sub0 = n.subscribe(states_topic, 10, jointStatesCallback);
+  ros::Subscriber sub1 = n.subscribe("initialpose", 10, initialPoseCallback);
+  ros::Subscriber sub2 = n.subscribe("correctpose", 10, correctPoseCallback);
   /*
   ros::Subscriber amcl_sub;
   if(amcl_topic.length() > 0){
