@@ -1,5 +1,5 @@
 max_covariance: 0.2
-finish: 2
+finish: 7
 
 node0:
     x: 7.8
