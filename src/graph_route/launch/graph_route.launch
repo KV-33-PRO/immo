@@ -1,7 +1,8 @@
 <launch>
-  <arg name="pose_x" default="17"/>
-  <arg name="pose_y" default="17"/>
-  <arg name="pose_th" default="-1.54"/>
+  <arg name="pose_x" default="8.2"/>
+  <arg name="pose_y" default="8.15"/>
+  <arg name="pose_th" default="0"/>
+  <arg name="map" default="hotel"/>
 
   <node pkg="map_server" type="map_server" name="map_server" args="$(find graph_route)/maps/profest.yaml"/>
   <node pkg="odometry" type="odometry_node" name="odometry_node" output="screen">

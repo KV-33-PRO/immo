@@ -15,5 +15,6 @@ link0_1:
     orient_y: 8.6
     orient_k: -1
     orient_a: -0.2
+    marker_a: 
     dist: 0.45
 
