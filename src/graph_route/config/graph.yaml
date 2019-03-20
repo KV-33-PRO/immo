@@ -174,19 +174,3 @@ link20_21:
 link21_22:
     enabled: 1
 
-marker0:
-  x: 7.2
-  y: 32.5
-
-marker1:
-  x: 7.3
-  y: 30.75
-
-marker2:
-  x: 8.45
-  y: 30.7
-
-marker3:
-  x: 10.4
-  y: 30.7
-
