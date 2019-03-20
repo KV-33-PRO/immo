@@ -2,7 +2,7 @@
   <arg name="nav_type" default="0"/>   <!-- 0-off 1-scan, 2-nav -->
   <arg name="odom" default="0"/>  <!-- 1-on, 2-off -->
   <arg name="led" default="0"/>  <!-- 1-on, 2-off -->
-  <arg name="cam_road" default="1"/>  <!-- 1-on, 2-off -->
+  <arg name="cam_road" default="0"/>  <!-- 1-on, 2-off -->
   <arg name="cam_sign" default="0"/>  <!-- 1-on, 2-off -->
 
 
@@ -39,6 +39,12 @@
   <group if="$(eval arg('led') == 1)">
      <!--Запуск управления световой индикацией-->
      <include file="$(find led_control)/launch/led_control.launch" />
+
+     <!--Запуск соединения с микроконтроллером для управления-->
+     <node name="immo_led" pkg="rosserial_python" respawn="true" type="serial_node.py">
+        <param name="port" value="/dev/ttyACM1"/>
+        <param name="baud" value="1000000"/>
+     </node>
   </group>
 
       <!--Запуск камер-->

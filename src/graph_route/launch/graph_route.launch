@@ -1,9 +1,9 @@
 <launch>
-  <arg name="pose_x" default="8"/>
-  <arg name="pose_y" default="8"/>
-  <arg name="pose_th" default="0"/>
+  <arg name="pose_x" default="17"/>
+  <arg name="pose_y" default="17"/>
+  <arg name="pose_th" default="-1.54"/>
 
-  <node pkg="map_server" type="map_server" name="map_server" args="$(find graph_route)/maps/Hotel/map.yaml"/>
+  <node pkg="map_server" type="map_server" name="map_server" args="$(find graph_route)/maps/profest.yaml"/>
   <node pkg="odometry" type="odometry_node" name="odometry_node" output="screen">
     <param name="initial_x" value="$(arg pose_x)"/>
     <param name="initial_y" value="$(arg pose_y)"/>
@@ -23,7 +23,7 @@
   <node pkg="tf" type="static_transform_publisher" name="base_laser_link" args="-0.18 0.0 0.0 0.0 0.0 0.0 /base_link /base_laser_link 50" />
   <node pkg="tf" type="static_transform_publisher" name="odom_to_map" args="0 0 0.151 0 0 0 1.0 map odom 100" />
   <node pkg="graph_route" type="graph_route_node" name="graph_route_node" output="screen">
-    <rosparam file="$(find graph_route)/config/graph_hotel.yaml" command="load" />
+    <rosparam file="$(find graph_route)/config/graph_profest.yaml" command="load" />
     <param name="max_rudder"  value="0.4"/>
     <param name="min_speed"  value="0.2"/>
     <param name="max_speed"  value="0.2"/>

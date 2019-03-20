@@ -1,0 +1,612 @@
+max_covariance: 0.2
+finish: 86
+
+node0:
+    x: 16.6
+    y: 17
+
+node1:
+    x: 16.6
+    y: 13
+
+node2:
+    x: 16.6
+    y: 12
+
+node3:
+    x: 16
+    y: 11.6
+
+node4:
+    x: 16.6
+    y: 10
+
+node5:
+    x: 16.6
+    y: 6
+
+node6:
+    x: 16
+    y: 5.6
+
+node7:
+    x: 15
+    y: 5.6
+
+node8:
+    x: 14
+    y: 5.6
+
+node9:
+    x: 13.4
+    y: 6
+
+node10:
+    x: 12
+    y: 5.6
+
+node11:
+    x: 11
+    y: 5.6
+
+node12:
+    x: 10
+    y: 5.6
+
+node13:
+    x: 9.4
+    y: 6
+
+node14:
+    x: 8
+    y: 5.6
+
+node15:
+    x: 7
+    y: 5.6
+
+node16:
+    x: 6
+    y: 5.6
+
+node17:
+    x: 5.4
+    y: 6
+
+node18:
+    x: 5.4
+    y: 7
+
+node19:
+    x: 5.4
+    y: 8
+
+node20:
+    x: 6
+    y: 8.6
+
+node21:
+    x: 7
+    y: 8.6
+
+node22:
+    x: 8
+    y: 8.6
+
+node23:
+    x: 8.6
+    y: 8
+
+node24:
+    x: 8.6
+    y: 7
+
+node25:
+    x: 8.6
+    y: 6
+
+node26:
+    x: 9.4
+    y: 10
+
+node27:
+    x: 10
+    y: 10.6
+
+node28:
+    x: 11
+    y: 10.6
+
+node29:
+    x: 12
+    y: 10.6
+
+node30:
+    x: 12.6
+    y: 10
+
+node31:
+    x: 12.6
+    y: 7
+
+node32:
+    x: 12.6
+    y: 6
+
+node33:
+    x: 9.4
+    y: 9
+
+node34:
+    x: 13.4
+    y: 10
+
+node35:
+    x: 13.4
+    y: 9
+
+node36:
+    x: 14
+    y: 10.6
+
+node37:
+    x: 15
+    y: 10.6
+
+node38:
+    x: 16
+    y: 10.6
+
+node39:
+    x: 16.6
+    y: 7
+
+node40:
+    x: 15
+    y: 11.6
+
+node41:
+    x: 14
+    y: 11.6
+
+node42:
+    x: 13.4
+    y: 12
+
+node43:
+    x: 12
+    y: 11.6
+
+node44:
+    x: 11
+    y: 11.6
+
+node45:
+    x: 4
+    y: 15
+
+node46:
+    x: 10
+    y: 11.6
+
+node47:
+    x: 9.4
+    y: 12
+
+node48:
+    x: 9.4
+    y: 14
+
+node56:
+    x: 13.4
+    y: 15
+
+node57:
+    x: 13.4
+    y: 16
+
+node58:
+    x: 12
+    y: 17.4
+
+node59:
+    x: 11
+    y: 17.4
+
+node60:
+    x: 10
+    y: 17.4
+
+node61:
+    x: 9
+    y: 16
+
+node62:
+    x: 8
+    y: 15
+
+node65:
+    x: 8.6
+    y: 10
+
+node66:
+    x: 8
+    y: 9.4
+
+node67:
+    x: 6
+    y: 9.4
+
+node68:
+    x: 4.6
+    y: 8
+
+node69:
+    x: 4.6
+    y: 7
+
+node70:
+    x: 4.6
+    y: 6
+
+node71:
+    x: 6
+    y: 4.6
+
+node72:
+    x: 7
+    y: 4.6
+
+node73:
+    x: 8
+    y: 4.6
+
+node74:
+    x: 10
+    y: 4.6
+
+node75:
+    x: 11
+    y: 4.6
+
+node76:
+    x: 12
+    y: 4.6
+
+node77:
+    x: 14
+    y: 4.6
+
+node78:
+    x: 15
+    y: 4.6
+
+node79:
+    x: 16
+    y: 4.6
+
+node80:
+    x: 17.4
+    y: 6
+
+node81:
+    x: 17.4
+    y: 9
+
+node82:
+    x: 17.4
+    y: 10
+
+node83:
+    x: 2
+    y: 14
+
+node84:
+    x: 2
+    y: 3.6
+
+node85:
+    x: 4
+    y: 1.6
+
+node86:
+    x: 17
+    y: 1.6
+
+node87:
+    x: 9.4
+    y: 8
+
+link0_1:
+  enabled: 1
+
+link1_2:
+  enabled: 1
+  orient: 90
+  dist: 1
+  anchor: 270
+
+link2_3:
+  enabled: 1
+
+link2_4:
+  enabled: 1
+
+link4_39:
+  enabled: 1
+
+link39_5:
+  enabled: 1
+
+link5_6:
+  enabled: 1
+
+link6_7:
+  enabled: 1
+
+link7_8:
+  enabled: 1
+
+link8_9:
+  enabled: 1
+
+link8_10:
+  enabled: 1
+
+link9_35:
+  enabled: 1
+
+link35_34:
+  enabled: 1
+
+link34_36:
+  enabled: 1
+
+link34_42:
+  enabled: 1
+
+link34_43:
+  enabled: 1
+
+link36_37:
+  enabled: 1
+
+link37_38:
+  enabled: 1
+
+link38_4:
+  enabled: 1
+
+link10_11:
+  enabled: 1
+
+link11_12:
+  enabled: 1
+
+link12_13:
+  enabled: 1
+
+link12_14:
+  enabled: 1
+
+link13_87:
+  enabled: 1
+
+link87_66:
+  enabled: 1
+
+link87_33:
+  enabled: 1
+
+link33_26:
+  enabled: 1
+
+link26_27:
+  enabled: 1
+
+link26_47:
+  enabled: 1
+
+link27_28:
+  enabled: 1
+
+link28_29:
+  enabled: 1
+
+link29_30:
+  enabled: 1
+
+link30_31:
+  enabled: 1
+
+link31_32:
+  enabled: 1
+
+link32_10:
+  enabled: 1
+
+link32_77:
+  enabled: 1
+
+link77_78:
+  enabled: 1
+
+link78_79:
+  enabled: 1
+
+link79_80:
+  enabled: 1
+
+link80_81:
+  enabled: 1
+
+link81_82:
+  enabled: 1
+
+link82_3:
+  enabled: 1
+
+link3_40:
+  enabled: 1
+
+link40_41:
+  enabled: 1
+
+link41_42:
+  enabled: 1
+
+link42_56:
+  enabled: 1
+
+link56_57:
+  enabled: 1
+
+link57_58:
+  enabled: 1
+
+link58_59:
+  enabled: 1
+
+link59_60:
+  enabled: 1
+
+link60_61:
+  enabled: 1
+
+link61_62:
+  enabled: 1
+
+link62_45:
+  enabled: 1
+
+link45_83:
+  enabled: 1
+
+link83_84:
+  enabled: 1
+
+link84_85:
+  enabled: 1
+
+link85_86:
+  enabled: 1
+
+link47_48:
+  enabled: 1
+
+link48_62:
+  enabled: 1
+
+link43_44:
+  enabled: 1
+
+link44_46:
+  enabled: 1
+
+link46_47:
+  enabled: 1
+
+link46_65:
+  enabled: 1
+
+link65_66:
+  enabled: 1
+
+link65_66:
+  enabled: 1
+
+link65_23:
+  enabled: 1
+
+link66_67:
+  enabled: 1
+
+link67_68:
+  enabled: 1
+
+link68_69:
+  enabled: 1
+
+link69_70:
+  enabled: 1
+
+link70_71:
+  enabled: 1
+
+link71_72:
+  enabled: 1
+
+link72_73:
+  enabled: 1
+
+link73_74:
+  enabled: 1
+
+link74_75:
+  enabled: 1
+
+link75_76:
+  enabled: 1
+
+link76_9:
+  enabled: 1
+
+link76_77:
+  enabled: 1
+
+link23_24:
+  enabled: 1
+
+link24_25:
+  enabled: 1
+
+link25_14:
+  enabled: 1
+
+link25_74:
+  enabled: 1
+
+link14_15:
+  enabled: 1
+
+link15_16:
+  enabled: 1
+
+link16_17:
+  enabled: 1
+
+link17_18:
+  enabled: 1
+
+link18_19:
+  enabled: 1
+
+link19_20:
+  enabled: 1
+
+link20_21:
+  enabled: 1
+
+link21_22:
+  enabled: 1
+
+link22_23:
+  enabled: 1
+
+link41_43:
+  enabled: 1
+
+link29_36:
+  enabled: 1
+
+link29_42:
+  enabled: 1
+
+link41_30:
+  enabled: 1
+
+link22_26:
+  enabled: 1
+
+link73_13:
+  enabled: 1
