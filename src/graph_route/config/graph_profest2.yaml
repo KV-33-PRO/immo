@@ -1,234 +1,247 @@
 max_covariance: 0.2
-finish: 53
+finish: 55
 
 node0:
-    x: 17.4
-    y: 17.1
+    x: 16.6
+    y: 17
 
 node1:
-    x: 17.4
-    y: 13.1
+    x: 16.6
+    y: 12
 
 node2:
-    x: 17.4
-    y: 12.1
+    x: 16
+    y: 11.4
 
 node3:
-    x: 17.3
-    y: 10.1
+    x: 14
+    y: 11.4
 
 node4:
-    x: 17.4
-    y: 9.1
+    x: 13.4
+    y: 12
 
 node5:
-    x: 17.4
-    y: 6.1
+    x: 13.4
+    y: 16
 
 node6:
-    x: 16.4
-    y: 5.1
+    x: 12
+    y: 17.4
 
 node7:
-    x: 15.4
-    y: 5.1
+    x: 10
+    y: 17.4
 
 node8:
-    x: 14.4
-    y: 5.1
+    x: 9
+    y: 16
 
 node9:
-    x: 12.4
-    y: 5.1
+    x: 8
+    y: 15
 
 node10:
-    x: 11.4
-    y: 5.1
+    x: 16.6
+    y: 10
 
 node11:
-    x: 10.4
-    y: 5.1
+    x: 16.6
+    y: 6
 
 node12:
-    x: 8.4
-    y: 5.1
+    x: 16
+    y: 5.4
 
 node13:
-    x: 7.4
-    y: 5.1
+    x: 14
+    y: 5.4
 
 node14:
-    x: 6.4
-    y: 5.1
+    x: 13.4
+    y: 6
 
 node15:
-    x: 5.4
-    y: 6.1
+    x: 13.4
+    y: 10
 
 node16:
-    x: 5.4
-    y: 7.1
+    x: 14
+    y: 10.6
 
 node17:
-    x: 5.4
-    y: 8.1
+    x: 16
+    y: 10.6
 
 node18:
-    x: 6.4
-    y: 9.1
+    x: 12
+    y: 11.4
 
 node19:
-    x: 7.4
-    y: 9.1
+    x: 10
+    y: 11.4
 
 node20:
-    x: 8.4
-    y: 9.1
+    x: 9.4
+    y: 14
 
 node21:
-    x: 9.4
-    y: 8.1
+    x: 8.6
+    y: 10
 
 node22:
-    x: 9.4
-    y: 7.1
+    x: 8
+    y: 9.4
 
 node23:
-    x: 9.4
-    y: 6.1
+    x: 6
+    y: 9.4
 
 node24:
-    x: 9.4
-    y: 10.1
+    x: 4.6
+    y: 8
 
 node25:
-    x: 9.4
-    y: 14.1
+    x: 4.6
+    y: 6
 
 node26:
-    x: 10.4
-    y: 11.1
+    x: 6
+    y: 4.6
 
 node27:
-    x: 17.4
-    y: 7.1
+    x: 8
+    y: 4.6
 
 node28:
-    x: 11.4
-    y: 11.1
+    x: 10
+    y: 4.6
 
 node29:
-    x: 12.4
-    y: 11.1
+    x: 12
+    y: 4.6
 
 node30:
-    x: 13.4
-    y: 10.1
+    x: 9.4
+    y: 6
 
 node31:
-    x: 13.4
-    y: 9.1
+    x: 9.4
+    y: 8
 
 node32:
-    x: 13.4
-    y: 7.1
+    x: 9.4
+    y: 10
 
 node33:
-    x: 13.4
-    y: 6.1
+    x: 10
+    y: 10.6
 
 node34:
-    x: 14.4
-    y: 11.1
+    x: 12
+    y: 10.6
 
 node35:
-    x: 15.4
-    y: 11.1
+    x: 12.6
+    y: 10
 
 node36:
-    x: 16.4
-    y: 11.1
+    x: 12.6
+    y: 6
 
 node37:
-    x: 13.4
-    y: 12.1
+    x: 12
+    y: 5.4
 
 node38:
-    x: 13.4
-    y: 13.1
+    x: 10
+    y: 5.4
 
 node39:
-    x: 13.4
-    y: 15.1
+    x: 8
+    y: 5.4
 
 node40:
-    x: 13.4
-    y: 16.1
+    x: 6
+    y: 5.4
 
 node41:
-    x: 12.4
-    y: 17.1
+    x: 5.4
+    y: 6
 
 node42:
-    x: 11.4
-    y: 17.1
+    x: 5.4
+    y: 8
 
 node43:
-    x: 10.4
-    y: 17.1
+    x: 6
+    y: 8.6
 
 node44:
-    x: 9.4
-    y: 16.1
+    x: 8
+    y: 8.6
+
+node45:
+    x: 8.6
+    y: 8
 
 node46:
-    x: 9.4
-    y: 13.1
+    x: 8.6
+    y: 6
 
 node47:
-    x: 9.4
-    y: 12.1
+    x: 14
+    y: 4.6
 
 node48:
-    x: 8.4
-    y: 15.1
+    x: 16
+    y: 4.6
 
 node49:
-    x: 4.4
-    y: 15.1
+    x: 4
+    y: 15
 
 node50:
-    x: 2.4
-    y: 14.1
+    x: 17.4
+    y: 6
 
 node51:
-    x: 2.4
-    y: 3.1
+    x: 17.4
+    y: 10
 
 node52:
-    x: 3.4
-    y: 1.7
+    x: 2
+    y: 14
 
 node53:
-    x: 17.4
-    y: 1.7
+    x: 2
+    y: 3.6
+
+node54:
+    x: 4
+    y: 1.6
+
+node55:
+    x: 17
+    y: 1.6
+
+node56:
+    x: 9.4
+    y: 12
 
 link0_1:
   enabled: 1
 
 link1_2:
   enabled: 1
+  edge_f: 260
+  edge_t: 280
+  edge_d: 0.7
 
 link2_3:
   enabled: 1
 
 link3_4:
-  enabled: 1
-
-link4_27:
-  enabled: 1
-
-link27_5:
   enabled: 1
 
 link5_6:
@@ -243,7 +256,19 @@ link7_8:
 link8_9:
   enabled: 1
 
-link9_10:
+link56_20:
+  enabled: 1
+
+link20_9:
+  enabled: 1
+
+link19_56:
+  enabled: 1
+
+link32_56:
+  enabled: 1
+
+link1_10:
   enabled: 1
 
 link10_11:
@@ -267,16 +292,19 @@ link15_16:
 link16_17:
   enabled: 1
 
-link17_18:
-    enabled: 1
+link17_10:
+  enabled: 1
+
+link15_4:
+  enabled: 1
+
+link15_18:
+  enabled: 1
 
 link18_19:
   enabled: 1
 
-link19_20:
-  enabled: 1
-
-link20_21:
+link19_21:
   enabled: 1
 
 link21_22:
@@ -285,52 +313,43 @@ link21_22:
 link22_23:
   enabled: 1
 
-link23_12:
+link23_24:
   enabled: 1
 
-link23_11:
+link24_25:
   enabled: 1
 
-link21_24:
+link25_26:
   enabled: 1
 
-link20_24:
+link26_27:
   enabled: 1
 
-link24_26:
-  enabled: 1
-
-link24_47:
-  enabled: 1
-
-link26_28:
+link27_28:
   enabled: 1
 
 link28_29:
   enabled: 1
 
-link29_37:
+link29_47:
   enabled: 1
 
-link29_34:
+link47_48:
   enabled: 1
 
-link29_30:
+link48_50:
   enabled: 1
 
-link30_37:
+link50_51:
   enabled: 1
 
-link34_30:
+link51_2:
   enabled: 1
 
-link34_35:
+link29_14:
   enabled: 1
 
-link35_36:
-  enabled: 1
-
-link36_3:
+link27_30:
   enabled: 1
 
 link30_31:
@@ -339,19 +358,58 @@ link30_31:
 link31_32:
   enabled: 1
 
+link31_22:
+  enabled: 1
+
 link32_33:
   enabled: 1
 
-link33_9:
+link33_34:
   enabled: 1
 
-link33_8:
+link34_35:
   enabled: 1
 
-link26_47:
+link35_36:
+  enabled: 1
+
+link36_37:
+  enabled: 1
+
+link3_18:
+  enabled: 1
+
+link3_35:
+  enabled: 1
+
+link9_49:
+  enabled: 1
+
+link49_52:
+  enabled: 1
+
+link52_53:
+  enabled: 1
+
+link53_54:
+  enabled: 1
+
+link54_55:
+  enabled: 1
+
+link4_5:
+  enabled: 1
+
+link44_32:
+  enabled: 1
+
+link36_47:
   enabled: 1
 
 link37_38:
+  enabled: 1
+
+link38_30:
   enabled: 1
 
 link38_39:
@@ -372,153 +430,17 @@ link42_43:
 link43_44:
   enabled: 1
 
-link46_25:
+link44_45:
   enabled: 1
 
-link47_46:
+link45_46:
   enabled: 1
 
-link25_48:
+link46_28:
   enabled: 1
 
-link44_48:
+link34_4:
   enabled: 1
 
-link48_49:
-  enabled: 1
-  bidir: 0
-
-link49_50:
-  enabled: 1
-
-link50_51:
-  enabled: 1
-
-link51_52:
-  enabled: 1
-
-link52_53:
-  enabled: 1
-
-link2_36:
-  enabled: 1
-
-link36_35:
-  enabled: 1
-
-link35_34:
-  enabled: 1
-
-link34_37:
-  enabled: 1
-
-link34_37:
-  enabled: 1
-
-link26_24:
-  enabled: 1
-
-link24_20:
-  enabled: 1
-
-link24_21:
-  enabled: 1
-
-link20_19:
-  enabled: 1
-
-link19_18:
-  enabled: 1
-
-link18_17:
-  enabled: 1
-
-link17_16:
-  enabled: 1
-
-link16_15:
-  enabled: 1
-
-link15_14:
-  enabled: 1
-
-link14_13:
-  enabled: 1
-
-link13_12:
-  enabled: 1
-
-link12_23:
-  enabled: 1
-
-link12_11:
-  enabled: 1
-
-link11_23:
-  enabled: 1
-
-link23_22:
-  enabled: 1
-
-link22_21:
-  enabled: 1
-
-link11_10:
-  enabled: 1
-
-link10_9:
-  enabled: 1
-
-link9_8:
-  enabled: 1
-
-link8_7:
-  enabled: 1
-
-link7_6:
-  enabled: 1
-
-link6_5:
-  enabled: 1
-
-link5_4:
-  enabled: 1
-
-link4_3:
-  enabled: 1
-
-link3_36:
-  enabled: 1
-
-link33_32:
-  enabled: 1
-
-link32_31:
-  enabled: 1
-
-link31_30:
-  enabled: 1
-
-link30_29:
-  enabled: 1
-
-link30_34:
-  enabled: 1
-
-link34_29:
-  enabled: 1
-
-link29_28:
-  enabled: 1
-
-link28_26:
-  enabled: 1
-
-link21_20:
-  enabled: 1
-
-link9_33:
-  enabled: 1
-
-link8_33:
+link34_16:
   enabled: 1
