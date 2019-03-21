@@ -3,7 +3,9 @@
   <arg name="pose_y" default="17"/>
   <arg name="pose_th" default="-1.57"/>
   <arg name="map" default="profest"/>
+  <!--
   <node pkg="map_server" type="map_server" name="map_server" args="$(find graph_route)/maps/$(arg map).yaml"/>
+  -->
   <node pkg="odometry" type="odometry_node" name="odometry_node" output="screen">
     <param name="initial_x" value="$(arg pose_x)"/>
     <param name="initial_y" value="$(arg pose_y)"/>

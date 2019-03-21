@@ -102,7 +102,7 @@ struct RouteBuilder {
     int count;
     int opt;
     bool complete;
-    Route routes[4096];
+    Route routes[2048];
     void build(uint8_t fromNode, uint8_t toNode);
 };
 
