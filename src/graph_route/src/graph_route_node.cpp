@@ -774,6 +774,7 @@ bool process(geometry_msgs::PoseStamped::Ptr target, geometry_msgs::Twist::Ptr c
         double dx = odom.pose.pose.position.x - prev_odom.pose.pose.position.x;
         double dy = odom.pose.pose.position.y - prev_odom.pose.pose.position.y;
         double d = sqrt(dx*dx + dy*dy);
+        ROS_INFO("Link distance: %0.2f, Curr distance: %0.2f", link.len, d);
         if(d >= 0.75 * link.len) {
             if(link.marker_d > 0) {
                 if(checkMarker(link.marker_a, link.marker_d)) {
