@@ -173,8 +173,9 @@ void update_motors() {
 void loop() {
   update_params();
   update_motors();
-    
-  unsigned long t = millis() - last_ms;
+
+  unsigned long time_now = millis();
+  unsigned long t = time_now - last_ms;
   
   if (t >= RATE_MS) {     //публикуем не чаще чем RATE_MS
     last_ms = millis();   //фиксируем последнее время публикации сообщения в топик
@@ -185,8 +186,8 @@ void loop() {
     enc_left = 0;      //обнуляем счетчики
     enc_right = 0;
 
-    state_vel[0] = state_pos[0] / (t / 1000.0); //преобразуем в рад/с
-    state_vel[1] = state_pos[1] / (t / 1000.0);
+    state_vel[0] = state_pos[0] * (1000.0 / t); //преобразуем в рад/с
+    state_vel[1] = state_pos[1] * (1000.0 / t);
 
     state_msg.header.stamp = nh.now();     //фиксируем время сообщения
 
